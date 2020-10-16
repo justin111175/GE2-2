@@ -5,20 +5,20 @@
 GestState::GestState()
 {
 	TRACE("ネットGEST.cpp\n");
-	active_ = false;
+	active_ = ActiveState::Init;
 }
 
 GestState::~GestState()
 {
 }
 
-bool GestState::ConnectHost(IPDATA hostIP)
+ActiveState GestState::ConnectHost(IPDATA hostIP)
 {
-	
+	// IPアドレスを入れて、接続できるかどうか
 	netHandle_ = ConnectNetWork(hostIP,portNum_);
 	if (netHandle_ >= 0)
 	{
-		active_ = true;
+		active_ = ActiveState::Stanby;
 	}
 	
 		
@@ -28,8 +28,10 @@ bool GestState::ConnectHost(IPDATA hostIP)
 
 bool GestState::CheckNetWork()
 {
+	// 接続しているかどうか、確認
 	if (GetLostNetWork() != -1)
 	{
+		//切断する
 		CloseNetWork(netHandle_);
 	}
 	return true;

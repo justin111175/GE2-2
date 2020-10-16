@@ -14,8 +14,17 @@ IPDATA NetWork::GetIp(void)
 
 bool NetWork::Updata()
 {
+
+
+
+
+
     return state_->Updata();
+
+
+
 }
+
 
 void NetWork::Send(Vector2 pos)
 {
@@ -74,12 +83,12 @@ NetWorkMode NetWork::GetNetWorkMode(void)
     return state_->GetMode();
 }
 
-bool NetWork::ConnectHost(IPDATA hostIP)
+ActiveState NetWork::ConnectHost(IPDATA hostIP)
 {
     return state_->ConnectHost(hostIP);
 }
 
-bool NetWork::GetActiv(void)
+ActiveState NetWork::GetActiv(void)
 {
     return state_->GetActive();
 }

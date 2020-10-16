@@ -6,11 +6,15 @@
 HostState::HostState()
 {
 	TRACE("ネットHOST.cpp\n");
-	active_ = !PreparationListenNetWork(portNum_);
-	//netHandle_=GetNewAcceptNetWork();
 
+	//!PreparationListenNetWork(portNum_)==1 接続開始　0接続失敗
+	active_ = ActiveState::Wait;
 
-	//TRACE("netHandle_確認%d", netHandle_);
+	if(!PreparationListenNetWork(portNum_) == 1)
+	{
+		active_ = ActiveState::Stanby;
+	}
+
 	
 }
 
@@ -18,7 +22,8 @@ HostState::~HostState()
 {
 }
 
-bool HostState::test(void)
+
+bool HostState::CheckNetWork()
 {
 
 	// GetNewAcceptNetWork:新たに確立した接続を示すネットワークハンドルを得る
@@ -39,14 +44,6 @@ bool HostState::test(void)
 		return false;
 	}
 	return true;
-}
-
-bool HostState::CheckNetWork()
-{
-	Vector2 a;
-	NetWorkRecv(netHandle_, &a, sizeof(a));
-
-	return test();
 }
 
 

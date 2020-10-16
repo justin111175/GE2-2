@@ -3,23 +3,30 @@
 
 NetWorkState::NetWorkState()
 {
-	active_ = false;
+	active_ = ActiveState::Wait;
 
 }
 
 NetWorkState::~NetWorkState()
 {
 }
+ActiveState NetWorkState::ConnectHost(IPDATA hostIP)
+{
 
-bool NetWorkState::GetActive(void)
+	return active_;
+}
+
+ActiveState NetWorkState::GetActive(void)
 {
 	return active_;
 }
 
-bool NetWorkState::ConnectHost(IPDATA hostIP)
-{
 
-	return false;
+
+ActiveState NetWorkState::SetActive(ActiveState active)
+{
+	
+	return active_=active;
 }
 
 
@@ -31,9 +38,9 @@ void NetWorkState::Send(Vector2 pos)
 
 Vector2 NetWorkState::Recv()
 {
-	Vector2 a;
-	NetWorkRecv(netHandle_, &a, sizeof(a));
-	return a;
+	Vector2 pos;
+	NetWorkRecv(netHandle_, &pos, sizeof(pos));
+	return pos;
 }
 
 bool NetWorkState::Updata(void)
@@ -41,17 +48,10 @@ bool NetWorkState::Updata(void)
 	if (CheckNetWork() != -1)
 	{
 		//-1à»äOÇ»ÇÁê⁄ë±ÇµÇƒÇ¢Ç»Ç¢
-		//NetWorkSend(netHandle_, "åqÇ™Ç¡ÇΩÇºÅ`ÅIÅI", 17);
-
 		return true;
-
 	}
-
 	//-1Ç»ÇÁê⁄ë±ÇµÇƒÇ¢ÇÈ
 
-	//NetWorkSend(netHandle_, &pos, sizeof(pos));
-
-	////NetWorkRecv
 
 	return false;
 }
