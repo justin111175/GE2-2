@@ -31,8 +31,13 @@ TitleScene::~TitleScene()
 unique_Base TitleScene::Update(unique_Base own)
 {
 	Draw();
-	
-	func_[mode_]();
+
+
+	do
+	{
+		func_[mode_]();
+
+	} while (IpNetwork.GetActiv() == ActiveState::Init);
 
 
 
@@ -141,6 +146,10 @@ void TitleScene::SetNetWork(void)
 	
 	TRACE("Activeó‘Ô->0:Non@1:Wait  2:Init  3:Stanby  4:Play\n");
 	TRACE("ó‘Ô‚Í%d‚Å‚·\n", IpNetwork.GetActiv());
+	if (IpNetwork.GetActiv() ==ActiveState::Init)
+	{
+		TRACE("Ú‘±¸”s\n");
+	}
 
 }
 
