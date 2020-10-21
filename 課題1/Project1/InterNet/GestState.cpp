@@ -5,7 +5,7 @@
 GestState::GestState()
 {
 	TRACE("ネットGEST.cpp\n");
-	active_ = ActiveState::Init;
+	active_ = ActiveState::Non;
 }
 
 GestState::~GestState()
@@ -18,10 +18,12 @@ ActiveState GestState::ConnectHost(IPDATA hostIP)
 	netHandle_ = ConnectNetWork(hostIP,portNum_);
 	if (netHandle_ >= 0)
 	{
-		active_ = ActiveState::Stanby;
+		active_ = ActiveState::Init;
 	}
 	
-		
+	//TRACE("Active状態->0:Non　1:Wait  2:Init  3:Stanby  4:Play\n");
+	//TRACE("active_の状態：%d\n", active_);
+	//TRACE("接続失敗\n");
 	return active_;
 
 }

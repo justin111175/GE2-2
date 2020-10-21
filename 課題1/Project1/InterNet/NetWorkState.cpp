@@ -3,13 +3,17 @@
 
 NetWorkState::NetWorkState()
 {
-	active_ = ActiveState::Wait;
+
+
+	//active_ = ActiveState::Init;
+
 
 }
 
 NetWorkState::~NetWorkState()
 {
 }
+
 ActiveState NetWorkState::ConnectHost(IPDATA hostIP)
 {
 
@@ -36,6 +40,15 @@ void NetWorkState::Send(Vector2 pos)
 	NetWorkSend(netHandle_, &pos, sizeof(pos));
 }
 
+void NetWorkState::SendStanby(bool stanby)
+{
+
+	NetWorkSend(netHandle_, &stanby, sizeof(stanby));
+	TRACE("初期化情報送信完了、開始待ち\n");
+	active_ = ActiveState::Stanby;
+
+}
+
 Vector2 NetWorkState::Recv()
 {
 	Vector2 pos;
@@ -43,15 +56,29 @@ Vector2 NetWorkState::Recv()
 	return pos;
 }
 
+bool NetWorkState::RecvStanby()
+{
+	bool ready;
+	NetWorkRecv(netHandle_, &ready, sizeof(ready));
+	return ready;
+
+}
+
 bool NetWorkState::Updata(void)
 {
-	if (CheckNetWork() != -1)
+
+	if (CheckNetWork())
 	{
-		//-1以外なら接続していない
+		
 		return true;
 	}
-	//-1なら接続している
-
 
 	return false;
 }
+
+int NetWorkState::GetHandle()
+{
+	return netHandle_;
+}
+
+

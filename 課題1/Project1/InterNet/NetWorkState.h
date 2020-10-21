@@ -1,6 +1,7 @@
 #pragma once
 #include<Dxlib.h>
 #include "../common/Vector2.h"
+
 enum class NetWorkMode
 {
     OFFLINE,
@@ -17,7 +18,7 @@ enum class ActiveState
     Non,                        // 未設定
     Wait,                       // 接続待機状態（ホスト用）
     Init,                       // 初期化中（ゲーム開始準備中、ホスト/ゲスト用）
-    Stanby,                      // 初期化情報送信済みの開始待ち（ホスト用）
+    Stanby,                     // 初期化情報送信済みの開始待ち（ホスト用）
     Play,                       // ゲーム中（ホスト/ゲスト用）
     Offline
 
@@ -40,16 +41,19 @@ public:
 
     // GESTモードもHOSTモードどちらも使えます
     void Send(Vector2 pos);                 //データ送る部分
+    void SendStanby(bool stanby);
     Vector2 Recv();                         // データもらう部分
-
+    bool RecvStanby();
     bool Updata(void);
+
+
+    int GetHandle();
 
 private:
     virtual bool CheckNetWork() { return false; };
 
-
-
 protected:
+
 
    const int portNum_=8086;
 

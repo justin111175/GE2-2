@@ -2,8 +2,10 @@
 #include "Dxlib.h"
 #include "NetWorkState.h"
 #include <memory>
-#define IpNetwork NetWork::GetInstance()
+#include <map>
+#include <functional>
 
+#define IpNetwork NetWork::GetInstance()
 
 enum class MesType
 {
@@ -11,6 +13,7 @@ enum class MesType
 	GAME_START,				// ƒzƒXƒg‚©‚ç‚Ì‰Šú‰»î•ñ‚Å‚Ì‰Šú‰»Š®—¹
 	POS
 };
+
 struct MesData
 {
 	MesType type;
@@ -51,9 +54,16 @@ public:
 	Vector2 Recv();
 private:
 
+	bool Wait();
+
+	std::map<ActiveState, std::function<bool(void)>> funcAct_;
+
 	bool revStanby_;
 
 	std::unique_ptr<NetWorkState> state_;
+
+	MesData mesData_;
+
 	NetWork();
 	~NetWork();
 

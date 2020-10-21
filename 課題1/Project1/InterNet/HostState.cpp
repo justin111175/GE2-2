@@ -5,14 +5,16 @@
 
 HostState::HostState()
 {
-	TRACE("ネットHOST.cpp\n");
+	TRACE("ホストです\n");
 
 	//!PreparationListenNetWork(portNum_)==1 接続開始　0接続失敗
-	active_ = ActiveState::Wait;
 
 	if(!PreparationListenNetWork(portNum_) == 1)
 	{
-		active_ = ActiveState::Stanby;
+
+		active_ = ActiveState::Wait;
+		TRACE("状態は%dです\n", active_);
+
 	}
 
 	
@@ -31,15 +33,18 @@ bool HostState::CheckNetWork()
 	if (tmpID != -1)
 	{
 		//接続があった、新規接続止め
+		TRACE("ゲストの接続\n");
 		netHandle_ = tmpID;
 		StopListenNetWork();
+		active_ = ActiveState::Init;
 	}
 
 	if (GetLostNetWork() != -1)
 	{
 		// 切断があったら、再開する
 		PreparationListenNetWork(portNum_);
-		TRACE("LOST");
+		TRACE("ゲストの切断\n");
+		active_ = ActiveState::Wait;
 
 		return false;
 	}

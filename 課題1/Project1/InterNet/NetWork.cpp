@@ -15,11 +15,14 @@ IPDATA NetWork::GetIp(void)
 bool NetWork::Updata()
 {
 
-
-
+    //state_->GetActive();
+   //return funcAct_[state_->GetActive()]();
 
 
     return state_->Updata();
+   //TRACE("Active状態->0:Non　1:Wait  2:Init  3:Stanby  4:Play\n");
+
+   //TRACE("%d", state_->GetActive());
 
 
 
@@ -37,7 +40,60 @@ Vector2 NetWork::Recv()
     return state_->Recv();
 }
 
+bool NetWork::Wait()
+{
 
+    TRACE("ホスト側：ゲスト待ち\n");
+    return true;
+}
+
+
+
+
+
+
+bool NetWork::CloseNetWork()
+{
+
+    //state_->Updata()
+    return false;
+}
+
+bool NetWork::SendMes(MesData& data)
+{
+
+    NetWorkSend(state_->GetHandle(), &data, sizeof(data));
+
+
+    return true;
+}
+
+void NetWork::SendStanby(void)
+{
+    revStanby_ = true;
+   // TRACE("準備終わって送信する\n");
+    SendMes(mesData_);
+    state_->SendStanby(revStanby_);
+
+    
+}
+
+void NetWork::SendStart()
+{
+    revStanby_ = true;
+
+    mesData_.type = MesType::GAME_START;
+    SendMes(mesData_);
+    state_->SendStanby(revStanby_);
+
+}
+
+bool NetWork::GetRevStanby()
+{
+
+
+    return state_->RecvStanby();
+}
 
 bool NetWork::SetNetWorkMode(NetWorkMode mode)
 {
@@ -95,6 +151,7 @@ ActiveState NetWork::GetActiv(void)
 
 NetWork::NetWork()
 {
+    revStanby_ = false;
 }
 
 NetWork::~NetWork()

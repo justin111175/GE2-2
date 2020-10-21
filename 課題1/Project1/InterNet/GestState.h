@@ -8,11 +8,10 @@ public:
     GestState();
     virtual ~GestState();
 
-    virtual NetWorkMode GetMode(void) { return NetWorkMode::GEST; };
+    NetWorkMode GetMode(void) { return NetWorkMode::GEST; };
     ActiveState ConnectHost(IPDATA hostIP);
     bool CheckNetWork()override;
     
-
 private:
 };
 
