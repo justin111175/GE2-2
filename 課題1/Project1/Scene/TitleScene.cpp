@@ -25,6 +25,11 @@ TitleScene::TitleScene()
 
 	tmx_ = std::make_unique<TmxObj>();
 	
+	//tmx_->SendData("map/testMap.tmx");
+	
+	//tmx_->LoadTmx("map/test.tmx");
+
+	
 
 	Init();
 
@@ -128,7 +133,7 @@ void TitleScene::SetNetWork(void)
 				mode_ = UpdataMode::StartInit;
 				TRACE("ホストからの開始合図を待ち\n");
 
-				mode_ = UpdataMode::GetHostIP;
+				
 
 			}
 
@@ -199,7 +204,7 @@ void TitleScene::GetHostIp()
 	{
 		if (IpNetwork.GetRevStanby())
 		{
-			TRACE("準備もらった\n");
+			
 			mode_ = UpdataMode::StartInit;
 		}
 		//if (IpNetwork.GetActiv() == ActiveState::Stanby)
@@ -213,16 +218,21 @@ void TitleScene::GetHostIp()
 
 void TitleScene::StartInit()
 {
+	IpNetwork.Updata();
+
 	if (IpNetwork.GetNetWorkMode()==NetWorkMode::HOST)
 	{
-		IpNetwork.Updata();
 		if (IpNetwork.GetActiv() == ActiveState::Init)
 		{
+			tmx_->SendSize("map/testMap.tmx");
+			tmx_->SendData("map/testMap.tmx");
 			IpNetwork.SendStanby();
 
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
+			tmx_->LoadTmx("map/testMap.tmx");
+
 			TRACE("プレイモードに行く\n");
 			mode_ = UpdataMode::Play;
 
@@ -233,15 +243,27 @@ void TitleScene::StartInit()
 	else
 	{
 
-		IpNetwork.Updata();
-		
 		if (IpNetwork.GetActiv() == ActiveState::Init)
 		{
-			IpNetwork.SendStart();
+
+			IpNetwork.NetRev();
+
+			//IpNetwork.SendStart();
+			//TRACE("プレイモードに行く\n");
+			//mode_ = UpdataMode::Play;
+
+		}
+
+		if (IpNetwork.GetActiv() == ActiveState::Play)
+		{
+
+			tmx_->LoadTmx("map/test.tmx");
 			TRACE("プレイモードに行く\n");
+
 			mode_ = UpdataMode::Play;
 
 		}
+
 
 	}
 
@@ -258,50 +280,22 @@ void TitleScene::Play()
 		mode_ = UpdataMode::SetNetWork;
 	}
 
-	for (auto&& conType_ : conType())
-	{
-		Ctl(conType_);
-	}
-	// もらったデータ（移動量）を足す
-	pos_ += IpNetwork.Recv();
+	//for (auto&& conType_ : conType())
+	//{
+	//	Ctl(conType_);
+	//}
+	//// もらったデータ（移動量）を足す
+	//pos_ += IpNetwork.Recv();
 
-	// 移動量をとって、値を送る
-	if (pos_ != posOld_)
-	{
-		Vector2 tmp = pos_ - posOld_;
-		IpNetwork.Send(tmp);
-	}
+	//// 移動量をとって、値を送る
+	//if (pos_ != posOld_)
+	//{
+	//	Vector2 tmp = pos_ - posOld_;
+	//	IpNetwork.Send(tmp);
+	//}
 
 }
 
-void TitleScene::ChipInit()
-{
-
-	//_dataBase.resize((__int64)CHIP_MAX_X * CHIP_MAX_Y);
-	//for (size_t no = 0; no < CHIP_MAX_Y; no++)
-	//{
-	//	_data.emplace_back(&_dataBase[no * CHIP_MAX_Y]);
-	//}
-
-
-	//// csvファイルを読み込む
-	//int type = NULL;
-	//int y = 0;
-	//int x = 0;
-
-	//FILE* fp = NULL;
-	//fopen_s(&fp, "csv/reiya1.csv", "rb");
-	//while (fscanf_s(fp, "%d", &type) != EOF)
-	//{
-	//	_dataBase[x] = static_cast<MapState>(type);
-	//	x++;
-	//}
-
-
-
-
-
-}
 
 void TitleScene::Ctl(conType input)
 {

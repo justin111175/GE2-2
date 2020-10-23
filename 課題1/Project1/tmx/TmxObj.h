@@ -9,7 +9,7 @@
 #include <utility>
 #include <map>
 #include <iostream>
-
+#include "../InterNet/NetWork.h"
 
 struct Layer
 {
@@ -45,12 +45,16 @@ public:
 	void LoadTsx(const char* tsx);
 	void Draw();
     Tileset tileset;
+	bool SendSize(std::string file);
+	bool SendData(std::string file);
 
 private:
 
-	std::map<std::string,std::string> layerData_;		// レイヤー名、レイヤーデータ
+
+	std::map<std::string,std::string> layerData_;
 	std::map<std::string, std::string> mapData_;
 
+	
 
 	std::map<std::string, std::vector<int>> layer_;
 	std::vector<int> StringChange(std::string string);

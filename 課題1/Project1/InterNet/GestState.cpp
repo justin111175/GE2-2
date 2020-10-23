@@ -5,7 +5,7 @@
 GestState::GestState()
 {
 	TRACE("ƒlƒbƒgGEST.cpp\n");
-	active_ = ActiveState::Non;
+	active_ = ActiveState::Wait;
 }
 
 GestState::~GestState()

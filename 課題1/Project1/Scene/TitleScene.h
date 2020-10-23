@@ -45,7 +45,6 @@ public:
     void StartInit();
 
     void Play();
-    void ChipInit();
 private:
     void Ctl(conType input);
     UpdataMode mode_;

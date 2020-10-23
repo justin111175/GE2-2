@@ -1,6 +1,7 @@
 #pragma once
 #include<Dxlib.h>
 #include "../common/Vector2.h"
+#include <string>
 
 enum class NetWorkMode
 {
@@ -42,6 +43,9 @@ public:
     // GESTモードもHOSTモードどちらも使えます
     void Send(Vector2 pos);                 //データ送る部分
     void SendStanby(bool stanby);
+
+    void Send(std::string file);
+
     Vector2 Recv();                         // データもらう部分
     bool RecvStanby();
     bool Updata(void);

@@ -49,6 +49,8 @@ void NetWorkState::SendStanby(bool stanby)
 
 }
 
+
+
 Vector2 NetWorkState::Recv()
 {
 	Vector2 pos;

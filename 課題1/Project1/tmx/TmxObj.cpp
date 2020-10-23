@@ -2,8 +2,8 @@
 #include <Dxlib.h>
 #include <sstream>
 #include "../common/ImageMng.h"
-
-
+#include "../InterNet/NetWork.h"
+#include "../common/_debug/_DebugConOut.h"
 TmxObj::TmxObj()
 {
 
@@ -11,7 +11,6 @@ TmxObj::TmxObj()
 
 
 	LoadTsx("map/map.tsx");
-	LoadTmx("map/testMap.tmx");
 
 	IpImageMng.GetID(tileset.name,"image/map.png", { tileset.tileWidth,tileset.tileHeight }, { tileset.columns,tileset.tilecount / tileset.columns });
 
@@ -110,6 +109,70 @@ void TmxObj::Draw()
 			
 		}
 	}
+}
+
+bool TmxObj::SendSize(std::string file)
+{
+	std::ifstream ifp(file);
+	ifp.seekg(0, std::ios_base::end);
+	MesData testMes = { MesType::TMX_SIZE,static_cast<int>(ifp.tellg()) };
+	IpNetwork.SendMes(testMes);
+
+	return true;
+
+
+
+
+
+
+}
+
+bool TmxObj::SendData(std::string file)
+{
+	std::ifstream ifp(file);//ファイルを受け取り
+
+	MesData data{ MesType::TMX_DATA };
+
+	std::string str;
+	int test = 0;
+	while (!ifp.eof()) //eof:最後かどうかのチェック
+	{
+		data.data[1] = ifp.get();
+		IpNetwork.SendMes(data);
+		data.data[0]++;
+
+		TRACE("TMX[%d]\n", data.data[0]);
+		TRACE("DATA:%d\n", data.data[1]);
+		//TRACE("%d\n",test);
+
+	}
+
+	TRACE("最後：%d回\n", data.data[0]);
+
+	//for (auto atb = ifp; atb != nullptr; atb = atb->next_attribute())
+	//{
+
+
+	//	IpNetwork.SendMes(testMes);
+	//}
+	//for (auto a : mapData_)
+	//{
+	//	test[0]=mapData_[]
+	//	MesData testMes = { MesType::TMX_DATA,};
+	//	IpNetwork.SendMes(testMes);
+
+	//}
+
+
+
+	return true;
+
+
+
+
+
+
+
 }
 
 std::vector<int> TmxObj::StringChange(std::string string)

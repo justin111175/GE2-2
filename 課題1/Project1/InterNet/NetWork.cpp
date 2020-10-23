@@ -2,7 +2,10 @@
 #include"HostState.h"
 #include "GestState.h"
 #include "../common/_debug/_DebugConOut.h"
-
+#include "../common/_debug/_DebugConOut.h"
+#include <sstream>
+#include <fstream>
+#include <iostream>
 IPDATA NetWork::GetIp(void)
 {
 
@@ -29,34 +32,28 @@ bool NetWork::Updata()
 }
 
 
-void NetWork::Send(Vector2 pos)
-{
-    // stateの送るPosの移動量
-    state_->Send(pos);
-}
-
-Vector2 NetWork::Recv()
-{
-    return state_->Recv();
-}
-
-bool NetWork::Wait()
-{
-
-    TRACE("ホスト側：ゲスト待ち\n");
-    return true;
-}
-
-
-
-
-
-
 bool NetWork::CloseNetWork()
 {
 
     //state_->Updata()
     return false;
+}
+
+void NetWork::TEST(std::string file)
+{
+    std::ofstream test(file);
+
+    for (auto i : revtmx_)
+    {
+        if (i != -1)
+        {
+            test.write(&i, sizeof(char));
+
+        }
+
+    }
+
+
 }
 
 bool NetWork::SendMes(MesData& data)
@@ -68,7 +65,15 @@ bool NetWork::SendMes(MesData& data)
     return true;
 }
 
-void NetWork::SendStanby(void)
+void NetWork::Send(std::string file)
+{
+    NetWorkSend(state_->GetHandle(), &file, sizeof(file));
+
+
+
+}
+
+void NetWork::SendStanby(void)//host
 {
     revStanby_ = true;
    // TRACE("準備終わって送信する\n");
@@ -78,19 +83,30 @@ void NetWork::SendStanby(void)
     
 }
 
-void NetWork::SendStart()
+void NetWork::SendStart()   //gset
 {
-    revStanby_ = true;
 
     mesData_.type = MesType::GAME_START;
     SendMes(mesData_);
-    state_->SendStanby(revStanby_);
+    TRACE("ゲーム開始合図を送る\n");
+    
+    state_->SetActive(ActiveState::Play);
+    
+
+
+
+
 
 }
 
 bool NetWork::GetRevStanby()
 {
-
+    
+    
+    //if (mesData_.type == MesType::TMX_DATA)
+    //{
+    //    revtmx_.resize();
+    //}
 
     return state_->RecvStanby();
 }
@@ -134,6 +150,8 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
     return true;
 }
 
+
+
 NetWorkMode NetWork::GetNetWorkMode(void)
 {
     return state_->GetMode();
@@ -147,6 +165,63 @@ ActiveState NetWork::ConnectHost(IPDATA hostIP)
 ActiveState NetWork::GetActiv(void)
 {
     return state_->GetActive();
+}
+
+void NetWork::NetRev()
+{
+
+    if (NetWorkMode::GEST == GetNetWorkMode())
+    {
+        int handle=state_->GetHandle();
+        MesData data;
+        if (sizeof(data) <= GetNetWorkDataLength(handle))
+        {
+            NetWorkRecv(handle, &data, sizeof(data));
+            
+            if (data.type == MesType::TMX_SIZE)
+            {
+
+                revtmx_.resize(data.data[0]);
+
+                TRACE("ホストからのTMXもらった%d\n", revtmx_.size());
+
+            }
+
+            if (data.type == MesType::TMX_DATA)
+            {
+
+
+                revtmx_[data.data[0]] = data.data[1];
+                
+
+                TRACE("ID : %d\n", data.data[0]);
+                TRACE("DATA : %d\n", data.data[1]);
+
+            }
+
+
+            if (data.type == MesType::STANDY)
+            {
+                revStanby_ = true;
+                TRACE("ホストからのスタンバイもらった\n")
+
+                    if (revStanby_)
+                    {
+                        TEST("map/test.tmx");
+                        SendStart();
+                    }
+
+            }
+
+        }
+    }
+    else
+    {
+
+    }
+
+
+
 }
 
 NetWork::NetWork()

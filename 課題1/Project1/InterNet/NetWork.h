@@ -4,13 +4,20 @@
 #include <memory>
 #include <map>
 #include <functional>
+#include <vector>
 
 #define IpNetwork NetWork::GetInstance()
+
+
+using RevBox = std::vector<char>;
+
 
 enum class MesType
 {
 	STANDY,					// 初期化情報送信完了（ホスト用）
 	GAME_START,				// ホストからの初期化情報での初期化完了
+	TMX_SIZE,
+	TMX_DATA,
 	POS
 };
 
@@ -33,7 +40,17 @@ public:
 	bool Updata(void);
 
 	bool CloseNetWork();
+
+
+
+
+	void TEST(std::string);
+
 	bool SendMes(MesData& data);
+	void Send(std::string file);
+
+
+
 	void SendStanby(void);
 	void SendStart();
 	bool GetRevStanby();
@@ -47,14 +64,13 @@ public:
 
 	ActiveState GetActiv(void);
 
+	void NetRev();
 
 
-
-	void Send(Vector2 pos);
-	Vector2 Recv();
 private:
 
-	bool Wait();
+	RevBox revtmx_;
+
 
 	std::map<ActiveState, std::function<bool(void)>> funcAct_;
 
