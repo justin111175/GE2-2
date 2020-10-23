@@ -23,7 +23,8 @@ TitleScene::TitleScene()
 	func_.try_emplace(UpdataMode::StartInit, std::bind(&TitleScene::StartInit, this));
 	func_.try_emplace(UpdataMode::Play, std::bind(&TitleScene::Play, this));
 
-	Tmx();
+	tmx_ = std::make_unique<TmxObj>();
+	
 
 	Init();
 
@@ -63,6 +64,8 @@ void TitleScene::Draw(void)
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClsDrawScreen();
 
+
+	tmx_->Draw();
 	DrawString(pos_.x, pos_.y, "TEST", 0xFFFFFF);
 
 
@@ -274,28 +277,27 @@ void TitleScene::Play()
 void TitleScene::ChipInit()
 {
 
-	_dataBase.resize((__int64)CHIP_MAX_X * CHIP_MAX_Y);
-	for (size_t no = 0; no < CHIP_MAX_Y; no++)
-	{
-		_data.emplace_back(&_dataBase[no * CHIP_MAX_Y]);
-	}
+	//_dataBase.resize((__int64)CHIP_MAX_X * CHIP_MAX_Y);
+	//for (size_t no = 0; no < CHIP_MAX_Y; no++)
+	//{
+	//	_data.emplace_back(&_dataBase[no * CHIP_MAX_Y]);
+	//}
 
 
-	// csvファイルを読み込む
-	int type = NULL;
-	int y = 0;
-	int x = 0;
+	//// csvファイルを読み込む
+	//int type = NULL;
+	//int y = 0;
+	//int x = 0;
 
-	FILE* fp = NULL;
-	fopen_s(&fp, "csv/reiya1.csv", "rb");
-	while (fscanf_s(fp, "%d", &type) != EOF)
-	{
-		_dataBase[x] = static_cast<MapState>(type);
-		x++;
-	}
+	//FILE* fp = NULL;
+	//fopen_s(&fp, "csv/reiya1.csv", "rb");
+	//while (fscanf_s(fp, "%d", &type) != EOF)
+	//{
+	//	_dataBase[x] = static_cast<MapState>(type);
+	//	x++;
+	//}
 
 
-	chipState_.try_emplace(Layer::BG, new ChipMng());
 
 
 
@@ -332,89 +334,85 @@ void TitleScene::Ctl(conType input)
 
 }
 
+std::vector<std::string> TitleScene::split(std::string& input, char delimiter)
+{
+	std::istringstream stream(input);
+	std::string field;
+	std::vector<std::string> result;
+	while (getline(stream, field, delimiter)) {
+		result.push_back(field);
+	}
+	return result;
+}
+
+
 void TitleScene::Tmx()
 {
 
-	TMX::Parser tmx;
-	tmx.load("testMap.tmx");
-
-	std::cout << "Map Version: " << tmx.mapInfo.version << std::endl;
-	std::cout << "Map Orientation: " << tmx.mapInfo.orientation << std::endl;
-	std::cout << "Map Width: " << tmx.mapInfo.width << std::endl;
-	std::cout << "Map Height: " << tmx.mapInfo.height << std::endl;
-	std::cout << "Tile Width: " << tmx.mapInfo.tileWidth << std::endl;
-	std::cout << "Tile Height: " << tmx.mapInfo.tileHeight<<"\n" << std::endl;
 
 
 
 
 
-	//for (std::map<std::string, std::string>::iterator it = tmx.mapInfo.property.begin(); it != tmx.mapInfo.property.end(); ++it) {
-	//	std::cout << "-> " << it->first << " : " << it->second << std::endl;
-	//}
-	//std::cout << std::endl;
-	//for (int i = 0; i < tmx.tilesetList.size(); i++) {
-	//	std::cout << "Tileset[ First GID: " << tmx.tilesetList[i].firstGID << " Source: " << tmx.tilesetList[i].source << " ]" << std::endl;
-	//}
-	//std::cout << std::endl;
-	for (std::map<std::string, TMX::Parser::TileLayer>::iterator it = tmx.tileLayer.begin(); it != tmx.tileLayer.end(); ++it) {
-		std::cout << std::endl;
-		std::cout << "Tile Layer Name: " << it->first << std::endl;
-		std::cout << "Tile Layer Visibility: " << tmx.tileLayer[it->first].visible << std::endl;
-		std::cout << "Tile Layer Opacity: " << tmx.tileLayer[it->first].opacity << std::endl;
-		std::cout << "Tile Layer Properties:" << std::endl;
-		if (tmx.tileLayer[it->first].property.size() > 0) {
-			for (std::map<std::string, std::string>::iterator it2 = tmx.tileLayer[it->first].property.begin(); it2 != tmx.tileLayer[it->first].property.end(); ++it2) {
-				std::cout << "-> " << it2->first << " : " << it2->second << std::endl;
-			}
-		}
-		std::cout << "Tile Layer Data Encoding: " << tmx.tileLayer[it->first].data.encoding << std::endl;
-		if (tmx.tileLayer[it->first].data.compression != "none") {
-			std::cout << "Tile Layer Data Compression: " << tmx.tileLayer[it->first].data.compression << std::endl;
-		}
-		std::cout << "Tile Layer Data Contents: " << tmx.tileLayer[it->first].data.contents << std::endl;
-		//TRACE("%u", tmx.tileLayer[it->first].data.contents);
+	//for (rapidxml::xml_node<>* node.= root_node->first_node("layer"); layer_node; layer_node = layer_node->next_sibling("layer")) {
+	//	//TileLayer layer;
+	//	//layer.name = layer_node->first_attribute("name")->value();
+	//	////std::cout << std::endl << "Layer Name: " << layer.name << std::endl;
 
+	//	//if (layer_node->first_node("properties") != 0) {
+	//	//	for (rapidxml::xml_node<>* properties_node = layer_node->first_node("properties")->first_node("property"); properties_node; properties_node = properties_node->next_sibling()) {
+	//	//		layer.property[properties_node->first_attribute("name")->value()] = properties_node->first_attribute("value")->value();
+	//	//	}
 
+	//	//	//std::cout << "Properties: " << std::endl;
 
-	}
-	//for (std::map<std::string, TMX::Parser::ObjectGroup>::iterator it = tmx.objectGroup.begin(); it != tmx.objectGroup.end(); ++it) {
-	//	std::cout << std::endl;
-	//	std::cout << "Object Group Name: " << it->first << std::endl;
-	//	std::cout << "Object Group Color: " << tmx.objectGroup[it->first].color << std::endl;
-	//	std::cout << "Object Group Visibility: " << tmx.objectGroup[it->first].visible << std::endl;
-	//	std::cout << "Object Group Opacity: " << tmx.objectGroup[it->first].opacity << std::endl;
-	//	std::cout << "Object Group Properties:" << std::endl;
-	//	if (tmx.objectGroup[it->first].property.size() > 0) {
-	//		for (std::map<std::string, std::string>::iterator it2 = tmx.objectGroup[it->first].property.begin(); it2 != tmx.objectGroup[it->first].property.end(); ++it2) {
-	//			std::cout << "-> " << it2->first << " : " << it2->second << std::endl;
-	//		}
-	//	}
-	//	for (std::map<std::string, TMX::Parser::Object>::iterator it2 = tmx.objectGroup[it->first].object.begin(); it2 != tmx.objectGroup[it->first].object.end(); ++it2) {
-	//		std::cout << std::endl;
-	//		if (it2->second.name != "") { std::cout << "Object Name: " << it2->first << std::endl; }
-	//		if (it2->second.type != "") { std::cout << "Object Type: " << tmx.objectGroup[it->first].object[it2->first].type << std::endl; }
-	//		std::cout << "Object Position X: " << tmx.objectGroup[it->first].object[it2->first].x << std::endl;
-	//		std::cout << "Object Position Y: " << tmx.objectGroup[it->first].object[it2->first].y << std::endl;
-	//		std::cout << "Object Width: " << tmx.objectGroup[it->first].object[it2->first].width << std::endl;
-	//		std::cout << "Object Height: " << tmx.objectGroup[it->first].object[it2->first].height << std::endl;
-	//		if (it2->second.gid != 0) { std::cout << "Object Tile GID: " << tmx.objectGroup[it->first].object[it2->first].gid << std::endl; }
-	//		std::cout << "Object Visible: " << tmx.objectGroup[it->first].object[it2->first].visible << std::endl;
-	//	}
+	//	//	for (std::map<std::string, std::string>::iterator it = mapInfo.property.begin(); it != mapInfo.property.end(); ++it) {
+	//	//		//  std::cout << "-> " << it->first << " : " << it->second << std::endl;
+	//	//	}
+	//	//}
+
+	//	//rapidxml::xml_node<>* data_node = layer_node->first_node("data");
+	//	//layer.data.encoding = data_node->first_attribute("encoding")->value();
+	//	////std::cout << "Layer Encoding: " << layer.data.encoding << std::endl;
+
+	//	//if (data_node->first_attribute("compression") > 0) {
+	//	//	layer.data.compression = data_node->first_attribute("compression")->value();
+	//	//	//  std::cout << "Layer Compression: " << layer.data.compression << std::endl;
+	//	//}
+
+	//	//layer.data.contents = data_node->value();
+	//	////std::cout << "Layer Data: " << layer.data.contents << std::endl;
+
+	//	//data_.try_emplace(layer.name, layer.data.contents);
+	//	//tileLayer[layer.name] = layer;
 	//}
 
-	//for (std::map<std::string, TMX::Parser::ImageLayer>::iterator it = tmx.imageLayer.begin(); it != tmx.imageLayer.end(); ++it) {
-	//	std::cout << std::endl;
-	//	std::cout << "Image Layer Name: " << it->first << std::endl;
-	//	std::cout << "Image Layer Visibility: " << tmx.imageLayer[it->first].visible << std::endl;
-	//	std::cout << "Image Layer Opacity: " << tmx.imageLayer[it->first].opacity << std::endl;
-	//	std::cout << "Image Layer Properties:" << std::endl;
-	//	if (tmx.imageLayer[it->first].property.size() > 0) {
-	//		for (std::map<std::string, std::string>::iterator it2 = tmx.imageLayer[it->first].property.begin(); it2 != tmx.imageLayer[it->first].property.end(); ++it2) {
-	//			std::cout << "-> " << it2->first << " : " << it2->second << std::endl;
-	//		}
-	//	}
-	//	std::cout << "Image Layer Source: " << tmx.imageLayer[it->first].image.source << std::endl;
-	//	std::cout << "Image Layer Transparent Color: " << tmx.imageLayer[it->first].image.transparencyColor << std::endl;
+
+
+
+	//TMX::Parser tmx;
+	//tmx.load("testMap.tmx");
+
+	////std::cout << "Map Version: " << tmx.mapInfo.version << std::endl;
+	////std::cout << "Map Orientation: " << tmx.mapInfo.orientation << std::endl;
+	//std::cout << "Map Width: " << tmx.mapInfo.width << std::endl;
+	//std::cout << "Map Height: " << tmx.mapInfo.height << std::endl;
+	//std::cout << "Tile Width: " << tmx.mapInfo.tileWidth << std::endl;
+	//std::cout << "Tile Height: " << tmx.mapInfo.tileHeight<<"\n" << std::endl;
+
+
+	//for (auto data : tmx.data_)
+	//{
+	//	std::cout <<"Layer Name : "<< data.first<< tmx.data_[data.first] << std::endl;
+
 	//}
+
+	//std::string line;
+
+	//std::vector<std::string> strvec = split(tmx.data_["Iteam"], ',');
+
+	//for (int i = 0; i < strvec.size(); i++) {
+	//	printf("%d", stoi(strvec.at(i)));
+	//}
+	
 }

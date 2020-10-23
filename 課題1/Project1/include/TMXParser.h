@@ -2,8 +2,6 @@
 #define TMXPARSER_H
 
 //#include <TSXParser.h>
-#include "rapidxml/rapidxml.hpp"
-#include "rapidxml/rapidxml_utils.hpp""
 
 #include <string>
 #include <vector>
@@ -93,6 +91,9 @@ namespace TMX
       std::map<std::string, TileLayer> tileLayer;
       std::map<std::string, ObjectGroup> objectGroup;
       std::map<std::string, ImageLayer> imageLayer;
+
+      std::map<std::string, std::string> data_;// レイヤー名、レイヤーデータ
+
     protected:
     private:
   };

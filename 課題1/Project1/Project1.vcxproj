@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ChipMng.cpp" />
+    <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="common\Input\KeyInput.cpp" />
     <ClCompile Include="common\Input\PadInput.cpp" />
     <ClCompile Include="common\_debug\_DebugConOut.cpp" />
@@ -32,10 +32,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
-    <ClCompile Include="src\TMXParser.cpp" />
+    <ClCompile Include="tmx\TmxObj.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChipMng.h" />
+    <ClInclude Include="common\ImageMng.h" />
     <ClInclude Include="common\Input\Controller.h" />
     <ClInclude Include="common\Input\conTypeID.h" />
     <ClInclude Include="common\Input\InputID.h" />
@@ -44,12 +44,11 @@
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="common\_debug\_DebugConOut.h" />
     <ClInclude Include="common\_debug\_DebugDispOut.h" />
-    <ClInclude Include="include\rapidxml\rapidxml.hpp" />
-    <ClInclude Include="include\rapidxml\rapidxml_iterators.hpp" />
-    <ClInclude Include="include\rapidxml\rapidxml_print.hpp" />
-    <ClInclude Include="include\rapidxml\rapidxml_utils.hpp" />
+    <ClInclude Include="tmx\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="tmx\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="tmx\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="tmx\rapidxml\rapidxml_utils.hpp" />
     <ClInclude Include="include\tileson.hpp" />
-    <ClInclude Include="include\TMXParser.h" />
     <ClInclude Include="InterNet\GestState.h" />
     <ClInclude Include="InterNet\HostState.h" />
     <ClInclude Include="InterNet\NetWorkState.h" />
@@ -57,8 +56,8 @@
     <ClInclude Include="InterNet\NetWork.h" />
     <ClInclude Include="Scene\SceneMng.h" />
     <ClInclude Include="Scene\TitleScene.h" />
-    <ClInclude Include="src\base64.h" />
     <ClInclude Include="TMXLoader\TMXLoader.h" />
+    <ClInclude Include="tmx\TmxObj.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

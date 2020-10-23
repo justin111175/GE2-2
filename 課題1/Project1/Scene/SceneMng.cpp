@@ -48,7 +48,7 @@ SceneMng::~SceneMng()
 }
 
 SceneMng::SceneMng():
-	screenSize{800,600}
+	screenSize{1080,720}
 {
 	frames_ = 0;
 	blendCnt_ = 0;

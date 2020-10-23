@@ -51,10 +51,10 @@
     <ClCompile Include="common\Input\PadInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="ChipMng.cpp">
+    <ClCompile Include="tmx\TmxObj.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\TMXParser.cpp">
+    <ClCompile Include="common\ImageMng.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,31 +104,28 @@
     <ClInclude Include="common\Vector2.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ChipMng.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="include\tileson.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="TMXLoader\TMXLoader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\rapidxml\rapidxml.hpp">
+    <ClInclude Include="tmx\TmxObj.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\rapidxml\rapidxml_iterators.hpp">
+    <ClInclude Include="tmx\rapidxml\rapidxml.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\rapidxml\rapidxml_print.hpp">
+    <ClInclude Include="tmx\rapidxml\rapidxml_iterators.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\rapidxml\rapidxml_utils.hpp">
+    <ClInclude Include="tmx\rapidxml\rapidxml_print.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\TMXParser.h">
+    <ClInclude Include="tmx\rapidxml\rapidxml_utils.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\base64.h">
+    <ClInclude Include="common\ImageMng.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

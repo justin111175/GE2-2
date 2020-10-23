@@ -7,7 +7,7 @@
 #include <array>
 #include "../InterNet/NetWork.h"
 #include <vector>
-#include "../ChipMng.h"
+#include "../tmx/TmxObj.h"
 
 enum class UpdataMode
 {
@@ -19,35 +19,7 @@ enum class UpdataMode
 
 };
 
-enum class Layer
-{
-    CHAR,
-    OBJ,
-    ITEAM,
-    BG
 
-
-
-};
-
-
-enum class MapState
-{
-    Non,
-    床1,
-    床2,
-    爆弾,
-    Non2,
-    壁1,
-    壁2,
-    壁3,
-    アイテム1,
-    アイテム2,
-    アイテム3,
-    アイテム4,
-    MAX
-
-};
 
 //using std::array << array, IPDATA >> ARRAYIP;
 #define CHIP_MAX_X 32
@@ -79,11 +51,14 @@ private:
     UpdataMode mode_;
     std::map<UpdataMode, std::function<void(void)>> func_;
 
-    std::map<Layer,std::unique_ptr<ChipMng>> chipState_;
+    std::unique_ptr<TmxObj> tmx_;
 
+    //std::vector<MapState> _dataBase;
+    //std::vector<MapState*> _data;
 
-    std::vector<MapState> _dataBase;
-    std::vector<MapState*> _data;
+    std::vector<std::string> split(std::string& input, char delimiter);
+
+    std::map<std::string, std::vector<int>> mapData_;
     void Tmx();
 
 
