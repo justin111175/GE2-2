@@ -10,7 +10,6 @@
 #define IpNetwork NetWork::GetInstance()
 
 
-using RevBox = std::vector<int>;
 
 
 enum class MesType:unsigned char
@@ -25,10 +24,19 @@ enum class MesType:unsigned char
 struct MesData
 {
 	MesType type;
-	short int id;
+	unsigned short int sdata;			//ID
+	unsigned char cdata;		
 	int data[2];
 };
 
+union UnionData
+{
+	char cData[8];
+	int iData[2];
+	long long IData;
+};
+
+using RevBox = std::vector<UnionData>;
 
 class NetWork
 {
@@ -47,7 +55,7 @@ public:
 
 
 
-	void TEST(std::string);
+	bool TEST(std::string);
 
 	bool SendMes(MesData& data);
 	void Send(std::string file);
@@ -70,6 +78,7 @@ public:
 	void NetRev();
 
 	bool revStanby_;
+	
 
 private:
 
@@ -84,7 +93,7 @@ private:
 	std::unique_ptr<NetWorkState> state_;
 
 	MesData mesData_;
-
+	//UnionData unionData_;
 
 	int retest = 0;
 

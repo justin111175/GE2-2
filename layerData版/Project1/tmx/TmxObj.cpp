@@ -48,16 +48,18 @@ void TmxObj::LoadTmx(const char* tmx)
 	{
 
 		rapidxml::xml_node<>* data_node = layer_node->first_node("data");
-		layerData_.try_emplace(layer_node->first_attribute("name")->value(), data_node->value());
-
-
+		layerData_.emplace(layer_node->first_attribute("id")->value(), data_node->value());
+		//layerData_[layer_node->first_attribute("name")->value()]
+		//layer_.try_emplace(layerData_[layer_node->first_attribute("name")], StringChange(layer_node->first_attribute("name")->value()));
 	}
 
 
 	for (auto i : layerData_)
 	{
 
-		layer_.try_emplace(i.first, StringChange(i.first));
+		layer_.try_emplace(i.first, StringChange(layerData_[i.first]));
+
+
 
 	}
 
@@ -119,14 +121,9 @@ bool TmxObj::SendSize(std::string file)
 	ifp.seekg(0, std::ios_base::end);
 
 
-	MesData testMes = { MesType::TMX_SIZE,static_cast<int>(ifp.tellg()) };
-	
-	//while (!ifp.eof())										//eof:最後かどうかのチェック
-	//{
+	MesData testMes = { MesType::TMX_SIZE };
+	testMes.data[0] = 200;
 
-	//	testMes.data[0]++;
-
-	//}
 	IpNetwork.SendMes(testMes);
 	//TRACE("%d\n",)
 
@@ -139,66 +136,7 @@ bool TmxObj::SendSize(std::string file)
 
 }
 
-bool TmxObj::SendData(std::string file)
-{
 
-
-
-
-
-
-	//binary(バイナリモード)->バイナリファイルを読み書きする際に適したモードです。改行コードの自動変換は行われません。
-	//(テキストモード)は書かれている内容をテキストだとみなして処理します。
-	std::fstream ifp(file/*,std::ios::in ||std::ios::binary*/);				//ファイルを受け取り
-
-	MesData data{ MesType::TMX_DATA };
-
-	int i = 0;
-	while (!ifp.eof())										//eof:最後かどうかのチェック
-	{	
-
-		{
-			ifp.read(reinterpret_cast<char*>(&data.data[0]), sizeof(int));
-			if (!ifp.eof())
-			{		
-
-				ifp.read(reinterpret_cast<char*>(&data.data[1]), sizeof(int));
-
-			}
-			else
-			{
-				data.data[0] = -1;
-				data.data[1] = -1;
-				//break;
-			}
-		}
-
-
-
-
-		
-		//if (data.data[1]>127)
-		{			
-
-
-
-
-			IpNetwork.SendMes(data);
-
-			TRACE("TMX[%d] , DATA1:%d , DATA2:%d\n", i, data.data[0], data.data[1]);
-
-			//data.data[0]++;
-			i++;
-		}
-
-	}
-	
-	ifp.close();
-	return true;
-
-
-
-}
 
 void TmxObj::LayerInit(std::string file)
 {
@@ -225,35 +163,220 @@ void TmxObj::LayerInit(std::string file)
 void TmxObj::LayerData(std::string string)
 {
 
-	LoadTmx("map/testMap.tmx");
 
-	std::ofstream test;
+	LoadTmx(string.c_str());
 
-	test.open(string);
-	
-	for (auto ID : layerData_)
+	for (auto i : layer_)
 	{
-		for (int i = 0; i < tileset.width * tileset.height; i++)
+		for (int q = 0; q < 21*17; q++)
 		{
-			test << layer_[ID.first][i]<<std::endl;
+			if (q % 21==20)
+			{
+				std::cout << layer_[i.first][q]<<std::endl;
+			}
+			else
+			{
+				std::cout << layer_[i.first][q]<<",";
+			}
+			
+
 		}
+
+	}
+	//return;
+	//std::ofstream ofp("map/testLayer.tmx");
+
+	//std::string data;
+	//					
+	//
+	//
+	//
+	//std::stringstream streamSTR;
+	//std::string test;
+	//auto IntChange = [&]() {
+	//
+
+	//	std::getline(streamSTR, test, ',');
+
+	//	return atoi(test.c_str());
+
+	//
+	//
+	//};
+
+
+
+	//while (!ifp.eof())
+	//{
+	//	while (std::getline(ifp, data))
+	//	{
+	//		if (data.find("data encoding") != std::string::npos)
+	//		{
+	//			std::getline(ifp, data);
+	//			int i = 0;
+	//			//streamSTR << data;
+
+	//			while (data.find("/data") == std::string::npos)
+	//			{
+	//				streamSTR << data;
+	//				
+	//				//for (int i = 0; i < 21; i++)
+	//				{
+	//					std::cout<<IntChange();
+
+	//				}
+
+	//				//ofp<< IntChange(data);
+	//				
+
+	//				//std::cout << data << std::endl;
+
+	//				i++;
+	//				std::getline(ifp, data);
+
+	//			} 
+	//			break;
+
+	//		}
+
+	//	}
+	//	
+
+
+
+
+	//}
+	//TRACE("完了\n");
+}
+
+void TmxObj::SendData()
+{
+
+	std::ifstream ifp("map/testMap.tmx");
+
+	MesData data{ MesType::TMX_DATA };
+	UnionData unionD;
+	std::string stringData;
+
+	std::stringstream strInt;
+	std::string string;
+
+	int cnt = 0;
+
+	data.sdata = 0;
+
+	if (!ifp.eof())
+	{
+		int cnt = 0;
+		while (std::getline(ifp, stringData))
+		{
+			do
+			{
+				std::getline(ifp, stringData);
+
+				if (ifp.eof())
+				{
+					break;
+				}
+
+			} while (stringData.find("data encoding") == std::string::npos);
+
+			while(std::getline(ifp, stringData))
+			{
+
+				while (stringData.find("/data") != std::string::npos)
+				{
+					break;
+				}
+
+				//std::getline(ifp, stringData);
+
+				strInt << stringData;
+				while (std::getline(strInt, string, ','))
+				{
+					std::cout << string;
+					cnt++;
+					if (cnt % 21 != 0)
+					{
+						std::cout << " ";
+
+					}
+					else
+					{
+						std::cout << std::endl;
+							
+					}
+				}
+
+				strInt.clear();
+
+			}
+		}
+
 	}
 
-	TRACE("完了\n");
+	
+
+
+	//for (auto layer : layer_)
+	//{
+	//	for (int i = 0; i <21*17; i++)
+	//	{
+
+
+	//		unionD.cData[cnt] = layer_[layer.first][i];
+	//		
+	//		//std::cout << layer_[layer.first][i] << std::endl;
+	//		if (i < 21 * 17-1 )
+	//		{
+	//			i++;
+	//			unionD.cData[cnt] += layer_[layer.first][i] << 4;
+	//		}
+
+	//		//else
+	//		//{
+	//		//	
+	//		//	unionD.cData[cnt] += layer_[layer.first][i] << 4;
+
+	//		//}
+
+
+	//		if (cnt != 7)
+	//		{
+	//			cnt++;
+	//		}
+	//		else
+	//		{
+	//			data.data[0] = unionD.iData[0];
+	//			data.data[1] = unionD.iData[1];		
+	//			IpNetwork.SendMes(data);
+	//			data.sdata++;
+
+	//			TRACE("TMX[%d] , DATA1:%d , DATA2:%d\n", data.sdata, data.data[0], data.data[1]);
+
+	//			cnt = 0;
+	//		}
+
+	//	}
+	//}
+	//std::cout << data.sdata <<std::endl;
+
+
+
 }
 
 std::vector<int> TmxObj::StringChange(std::string string)
 {
 
 	std::string indata, outdata;
-	indata = layerData_[string];
+	indata = string;
 
 	std::stringstream Data;
 	Data << indata;
 
 	std::vector<int> tmpVector;
 
-	for (int i = 0; i < 32 * 32; i++)
+	for (int i = 0; i < 21 * 17; i++)
 	{
 		std::getline(Data, outdata, ',');
 		tmpVector.emplace_back(std::atoi(outdata.c_str()));

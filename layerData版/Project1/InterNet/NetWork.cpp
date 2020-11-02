@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <bitset>
+
 IPDATA NetWork::GetIp(void)
 {
 
@@ -39,40 +41,91 @@ bool NetWork::CloseNetWork()
     return false;
 }
 
-void NetWork::TEST(std::string file)
+bool NetWork::TEST(std::string file)
 {
-    std::ofstream test;
-    
-    test.open(file, std::ios::out | std::ios::binary);
+    std::ofstream ofp;
+    std::ifstream ifp("map/tmx.dat");
+    ofp.open(file);
 
+    std::string stringData;
 
-    for (auto i : revtmx_)
+    int count = 0;
+
+    if (!ifp.eof())
     {
-        //if (i != -1)
+        do
         {
+            std::getline(ifp, stringData);
+            ofp << stringData<<std::endl;
 
-            if (i <= 0)
+            if (ifp.eof())
             {
-                test.close();
+
                 break;
-
             }
 
-            if (i <= 127)
+        } while (stringData.find("data encoding") == std::string::npos);
+
+
+        for (auto data : revtmx_)
+        {
+            UnionData test;
+            test = data;
+            for (int byteCnt = 0; byteCnt < 8; byteCnt++)
             {
-                break;
+                for (int bitCnt = 0; bitCnt <2; bitCnt++)
+                {
+                    std::ostringstream strNum;
+                    strNum.clear();
 
-            }
-            else
-            {
-                test.write(reinterpret_cast<char*>(&i), sizeof(int));
-            }
+                    strNum << ((test.cData[byteCnt] >> (4 * bitCnt)) & 0x0f);
+                    ofp << strNum.str();
 
+                    count++;
+
+                    if (count % 21 != 0)
+                    {
+                        ofp << ",";
+                    }
+                    else
+                    {
+                        if ((count % (21 * 17)) == 0)
+                        {
+                            ofp << std::endl;
+                            do
+                            {
+                                std::getline(ifp, stringData);
+                                ofp << stringData << std::endl;
+
+                                if (ifp.eof())
+                                {
+                                    return true;
+                                }
+       
+
+                            } while (stringData.find("data encoding") == std::string::npos);
+                            
+
+                        }
+                        else
+                        {
+                            ofp << ","<<std::endl;
+
+                        }
+
+                    }
+                }
+            }
         }
 
     }
 
+    ofp.close();
 
+
+
+
+    TRACE("‰ñ”@F%d\n", count);
 
 }
 
@@ -199,6 +252,7 @@ void NetWork::NetRev()
     {
         int handle=state_->GetHandle();
         MesData data;
+        
         if (sizeof(data) <= GetNetWorkDataLength(handle))
         {
             NetWorkRecv(handle, &data, sizeof(data));
@@ -207,7 +261,7 @@ void NetWork::NetRev()
             {
                 //if (revtmx_.size() > data.data[0])
                 {
-                    revtmx_.resize(data.data[0]);
+                   revtmx_.resize(data.data[0]);
 
                     start = std::chrono::system_clock::now();
 
@@ -218,22 +272,11 @@ void NetWork::NetRev()
 
             if (data.type == MesType::TMX_DATA)
             {
+                revtmx_[data.sdata].iData[0] = data.data[0];
+                revtmx_[data.sdata].iData[1] = data.data[1];
 
-               //if (revtmx_.size() >= data.data[0])
-                {
-                    //revtmx_.at(data.data[0]) = data.data[1];
+                TRACE(" ID : %d, DATA1 : %d, DATA2 : %d\n", data.sdata, data.data[0], data.data[1]);
 
-                    revtmx_[retest] = data.data[0];
-                    retest++;
-                    TRACE(" ID : %d,DATA1 : %d\n", retest,data.data[0]);
-
-                    revtmx_[retest] = data.data[1];
-                    retest++;
-
-                    TRACE(" ID : %d,DATA2 : %d\n", retest, data.data[1]);
-
-
-                }
             }
 
 

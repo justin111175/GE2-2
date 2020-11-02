@@ -26,8 +26,10 @@ TitleScene::TitleScene()
 
 	tmx_ = std::make_unique<TmxObj>();
 	
-	//tmx_->LayerData("map/testLayer.tmx");
+	tmx_->SendData();
 
+	//tmx_->LayerData("map/testMap.tmx");
+	//tmx_->SendData();
 	
 	//tmx_->SendData("map/testlayer.tmx");
 
@@ -232,9 +234,7 @@ void TitleScene::StartInit()
 		{
 
 			tmx_->SendSize("map/testMap.tmx");
-			tmx_->LayerData("map/testlayer.tmx");
-
-			tmx_->SendData("map/testlayer.tmx");
+			tmx_->SendData();
 
 			IpNetwork.SendStanby();
 
@@ -286,7 +286,7 @@ void TitleScene::StartInit()
 		if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
 
-
+			//IpNetwork.TEST("map/testRev.tmx");
 			tmx_->LoadTmx("map/test.tmx");
 
 

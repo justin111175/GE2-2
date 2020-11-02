@@ -46,11 +46,12 @@ public:
 	void Draw();
     Tileset tileset;
 	bool SendSize(std::string file);
-	bool SendData(std::string file);
 	void LayerInit(std::string file);
 
 	void LayerData(std::string string);
 
+
+	void SendData();
 private:
 
 
