@@ -1,16 +1,26 @@
 #pragma once
 #include "Dxlib.h"
 #include "NetWorkState.h"
-#include <memory>
 #include <map>
 #include <functional>
 #include <vector>
 #include <chrono>
+#include <thread>
+#include "../tmx/TmxObj.h"
+#include <memory>
 
 #define IpNetwork NetWork::GetInstance()
 
 
+enum class UpdataMode
+{
+	SetNetWork,
+	GetHostIP,
+	StartInit,
+	Play
 
+
+};
 
 enum class MesType:unsigned char
 {
@@ -37,6 +47,7 @@ union UnionData
 };
 
 using RevBox = std::vector<UnionData>;
+
 
 class NetWork
 {
@@ -79,9 +90,27 @@ public:
 
 	bool revStanby_;
 	
+	std::unique_ptr<TmxObj> tmx_;
 
+	std::thread updata_;
+	
+	void SetNetWork();
+	void GetHostIp();
+	void StartInit();
+	void Play();
+
+	UpdataMode GetMode();
 private:
 
+	UpdataMode mode_;
+	std::map<UpdataMode, std::function<void(void)>> func_;
+
+
+
+
+
+
+	void ThreadUpdata(void);
 	std::chrono::system_clock::time_point  start, end;
 
 	RevBox revtmx_;
@@ -93,7 +122,6 @@ private:
 	std::unique_ptr<NetWorkState> state_;
 
 	MesData mesData_;
-	//UnionData unionData_;
 
 	int retest = 0;
 

@@ -24,15 +24,19 @@
     <ClCompile Include="common\Input\PadInput.cpp" />
     <ClCompile Include="common\_debug\_DebugConOut.cpp" />
     <ClCompile Include="common\_debug\_DebugDispOut.cpp" />
+    <ClCompile Include="Scene\CrossOver.cpp" />
+    <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="InterNet\GestState.cpp" />
     <ClCompile Include="InterNet\HostState.cpp" />
     <ClCompile Include="InterNet\NetWorkState.cpp" />
     <ClCompile Include="Scene\BaseScene.cpp" />
     <ClCompile Include="InterNet\NetWork.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Scene\LoginScene.cpp" />
     <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="tmx\TmxObj.cpp" />
+    <ClCompile Include="Scene\Transition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\ImageMng.h" />
@@ -44,6 +48,9 @@
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="common\_debug\_DebugConOut.h" />
     <ClInclude Include="common\_debug\_DebugDispOut.h" />
+    <ClInclude Include="Scene\CrossOver.h" />
+    <ClInclude Include="Scene\GameScene.h" />
+    <ClInclude Include="Scene\LoginScene.h" />
     <ClInclude Include="tmx\rapidxml\rapidxml.hpp" />
     <ClInclude Include="tmx\rapidxml\rapidxml_iterators.hpp" />
     <ClInclude Include="tmx\rapidxml\rapidxml_print.hpp" />
@@ -58,6 +65,7 @@
     <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="TMXLoader\TMXLoader.h" />
     <ClInclude Include="tmx\TmxObj.h" />
+    <ClInclude Include="Scene\Transition.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

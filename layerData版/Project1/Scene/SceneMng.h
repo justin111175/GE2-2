@@ -36,9 +36,8 @@ public:
 
 private:
 	static SceneMng* sInstance;									// インスタンス
-	unique_Base activeScene_;									// 今Sceneの位置
+	unique_Base Scene_;									// 今Sceneの位置
 
-	void Draw(void);
 
 	int frames_;												// フレーム数
 

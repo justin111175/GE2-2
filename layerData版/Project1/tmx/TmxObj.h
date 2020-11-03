@@ -9,7 +9,6 @@
 #include <utility>
 #include <map>
 #include <iostream>
-#include "../InterNet/NetWork.h"
 
 struct Layer
 {

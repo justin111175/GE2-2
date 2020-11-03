@@ -5,7 +5,7 @@ NetWorkState::NetWorkState()
 {
 
 
-	//active_ = ActiveState::Init;
+	active_ = ActiveState::Init;
 
 
 }

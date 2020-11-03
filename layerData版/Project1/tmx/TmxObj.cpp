@@ -284,39 +284,78 @@ void TmxObj::SendData()
 			while(std::getline(ifp, stringData))
 			{
 
+				if (stringData.find("/data") == std::string::npos)
+				{
+					strInt << stringData;
+
+					while (std::getline(strInt, string, ','))
+					{
+						
+						int tmpcnt = cnt / 2;
+						if (cnt % 2 == 0)
+						{
+							
+							unionD.cData[tmpcnt] = atoi(string.c_str());
+							std::cout << atoi(string.c_str());
+
+						}
+						else
+						{
+							unionD.cData[tmpcnt] += atoi(string.c_str()) << 4;
+							std::cout << atoi(string.c_str());
+						}
+						
+
+						if (cnt != 15)
+						{
+							cnt++;
+							if (cnt % 21 != 0)
+							{
+								std::cout << " ";
+
+							}
+							else
+							{
+								std::cout << std::endl;
+							
+							}
+						}
+						else
+						{
+							data.data[0] = unionD.iData[0];
+							data.data[1] = unionD.iData[1];		
+							IpNetwork.SendMes(data);
+							data.sdata++;
+
+							TRACE("TMX[%d] , DATA1:%d , DATA2:%d\n", data.sdata, data.data[0], data.data[1]);
+
+							cnt = 0;
+						}
+					}
+
+					strInt.clear();
+				}
+
 				while (stringData.find("/data") != std::string::npos)
 				{
-					break;
-				}
-
-				//std::getline(ifp, stringData);
-
-				strInt << stringData;
-				while (std::getline(strInt, string, ','))
-				{
-					std::cout << string;
-					cnt++;
-					if (cnt % 21 != 0)
+					do
 					{
-						std::cout << " ";
+						std::getline(ifp, stringData);
 
-					}
-					else
-					{
-						std::cout << std::endl;
-							
-					}
+						if (ifp.eof())
+						{
+							break;
+						}
+
+					} while (stringData.find("data encoding") == std::string::npos);
 				}
-
-				strInt.clear();
 
 			}
 		}
 
 	}
 
-	
-
+	//return;
 
 	//for (auto layer : layer_)
 	//{
@@ -333,12 +372,7 @@ void TmxObj::SendData()
 	//			unionD.cData[cnt] += layer_[layer.first][i] << 4;
 	//		}
 
-	//		//else
-	//		//{
-	//		//	
-	//		//	unionD.cData[cnt] += layer_[layer.first][i] << 4;
 
-	//		//}
 
 
 	//		if (cnt != 7)
@@ -359,7 +393,7 @@ void TmxObj::SendData()
 
 	//	}
 	//}
-	//std::cout << data.sdata <<std::endl;
+	std::cout << data.sdata <<std::endl;
 
 
 

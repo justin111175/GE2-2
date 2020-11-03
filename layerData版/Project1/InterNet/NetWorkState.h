@@ -57,11 +57,11 @@ private:
     virtual bool CheckNetWork() { return false; };
 
 protected:
+   ActiveState  active_;
 
 
    const int portNum_=8086;
 
-   ActiveState  active_;
    int netHandle_ = 0;
 };
 

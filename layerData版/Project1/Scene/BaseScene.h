@@ -3,10 +3,25 @@
 #include <String>
 #include "Dxlib.h"
 #include "../common/Input/Controller.h"
-// クラスのプロトタイプ宣言
+#include "../common/ImageMng.h"
+
+enum class SceneChange
+{
+	Title_GO_Login,
+	Login_GO_Game
+
+
+
+};
+
+
+
 class BaseScene;
 
 using unique_Base = std::unique_ptr<BaseScene>;							// スマートポインタ-BaseScene
+
+
+
 
 
 class BaseScene
@@ -14,10 +29,18 @@ class BaseScene
 public:
 	BaseScene();
 	virtual ~BaseScene();
-	virtual unique_Base Update(unique_Base own) = 0;					// 純粋仮想関数
+	virtual unique_Base Update(unique_Base own)=0;
+
+
+	
+	virtual void Draw();
+	virtual void DrawOwn() = 0;
 
 protected:
 	std::map<conType, std::unique_ptr<Controller>> controller;
+	int screenID_;
+
+
 };
 
 

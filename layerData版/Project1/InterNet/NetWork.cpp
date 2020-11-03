@@ -20,16 +20,8 @@ IPDATA NetWork::GetIp(void)
 bool NetWork::Updata()
 {
 
-    //state_->GetActive();
-   //return funcAct_[state_->GetActive()]();
-
 
     return state_->Updata();
-   //TRACE("Active状態->0:Non　1:Wait  2:Init  3:Stanby  4:Play\n");
-
-   //TRACE("%d", state_->GetActive());
-
-
 
 }
 
@@ -169,22 +161,12 @@ void NetWork::SendStart()   //gset
     TRACE("ゲーム開始合図を送る\n");
     
     state_->SetActive(ActiveState::Play);
-    
-
-
-
-
 
 }
 
 bool NetWork::GetRevStanby()
 {
-    
-    
-    //if (mesData_.type == MesType::TMX_DATA)
-    //{
-    //    revtmx_.resize();
-    //}
+
 
     return state_->RecvStanby();
 }
@@ -259,13 +241,12 @@ void NetWork::NetRev()
             
             if (data.type == MesType::TMX_SIZE)
             {
-                //if (revtmx_.size() > data.data[0])
-                {
-                   revtmx_.resize(data.data[0]);
 
-                    start = std::chrono::system_clock::now();
+                revtmx_.resize(data.data[0]);
 
-                }
+                start = std::chrono::system_clock::now();
+
+                
                 TRACE("ホストからのTMXもらった%d\n", data.data[0]);
 
             }
@@ -276,6 +257,7 @@ void NetWork::NetRev()
                 revtmx_[data.sdata].iData[1] = data.data[1];
 
                 TRACE(" ID : %d, DATA1 : %d, DATA2 : %d\n", data.sdata, data.data[0], data.data[1]);
+                end = std::chrono::system_clock::now();
 
             }
 
@@ -284,21 +266,14 @@ void NetWork::NetRev()
             {
                 revStanby_ = true;
 
-                end = std::chrono::system_clock::now();
-                std::chrono::seconds s = std::chrono::duration_cast<std::chrono::seconds>((end - start));
+                std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
 
                 TRACE("時間　：　%d秒\n", s.count());
 
 
                 state_->SetActive(ActiveState::Stanby);
 
-                TRACE("ホストからのスタンバイもらった\n")
-
-                    //if (revStanby_)
-                    //{
-                    //    TEST("map/test.tmx");
-                    //    SendStart();
-                    //}
+                TRACE("ホストからのスタンバイもらった\n");
 
             }
 
@@ -317,7 +292,8 @@ void NetWork::NetRev()
             {
 
                 end = std::chrono::system_clock::now();
-                std::chrono::seconds s = std::chrono::duration_cast<std::chrono::seconds>((end - start));
+
+                std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
 
                 TRACE("時間　：　%d秒\n", s.count());
 
@@ -331,11 +307,238 @@ void NetWork::NetRev()
 
 }
 
+void NetWork::SetNetWork()
+{
+
+    auto ipData = IpNetwork.GetIp();
+
+    TRACE("IPアドレス：%d.%d.%d.%d\n", ipData.d1, ipData.d2, ipData.d3, ipData.d4);
+    TRACE("0:HOSTです\n1:GESTです\n/*2:前回の接続先です*/\n3:offline\n");
+
+
+    IPDATA hostIP;					// ホストのIP
+
+    int mode;
+
+    do
+    {
+        std::cin >> mode;
+
+        if (mode == 0)
+        {
+            TRACE("ゲスト接続待ち待機\n");
+
+            IpNetwork.SetNetWorkMode(NetWorkMode::HOST);
+            mode_ = UpdataMode::StartInit;
+
+
+        }
+        else if (mode == 1)
+        {
+
+            IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
+            TRACE("IPアドレスを入力してください\n");
+            std::string ip, data;
+            std::cin >> ip;
+            //IPに入力された情報をホストIPに入れる
+            //std::getline
+            std::stringstream ipData;
+            // stringstreamで文字列から数値を取り出す
+            // coutのような使い方で代入する
+            ipData << ip;
+
+            auto GetIpNum = [&]() {
+                std::getline(ipData, data, '.');
+                return atoi(data.c_str());
+            };
+            hostIP.d1 = GetIpNum();
+            hostIP.d2 = GetIpNum();
+            hostIP.d3 = GetIpNum();
+            hostIP.d4 = GetIpNum();
+
+            if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
+            {
+                TRACE("ホスト接続\n");
+                mode_ = UpdataMode::StartInit;
+                TRACE("ホストからの開始合図を待ち\n");
+
+
+
+            }
+
+
+            //if (IpNetwork.ConnectHost(hostIP)==ActiveState::Init)
+            {
+                //TRACE("ホスト接続\n");
+                //mode_ = UpdataMode::StartInit;
+                //TRACE("ホストからの開始合図を待ち\n");
+                //
+                //std::unique_ptr<FILE, decltype(&fclose)> fp(fopen("hostIP.txt", "wt"), fclose);
+                //
+                //fwrite(&ipData, sizeof(data), 1, &(*fp));
+                //std::ofstream fp2("hostIP.txt", std::ios::trunc);
+                //
+                //fp2 << data;
+
+            }
+        }
+        else if (mode == 2)
+        {
+            IpNetwork.SetNetWorkMode(NetWorkMode::OFFLINE);
+        }
+        else
+        {
+
+        }
+    } while (mode < 0 || mode>2);
+
+
+
+}
+
+void NetWork::GetHostIp()
+{
+    if (IpNetwork.Updata())
+    {
+        if (IpNetwork.GetRevStanby())
+        {
+
+            mode_ = UpdataMode::StartInit;
+        }
+        //if (IpNetwork.GetActiv() == ActiveState::Stanby)
+        //{
+        //	mode_ = UpdataMode::Play;
+        //}
+    }
+
+}
+
+void NetWork::StartInit()
+{
+    IpNetwork.Updata();
+
+    if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+    {
+        if (IpNetwork.GetActiv() == ActiveState::Init)
+        {
+
+            tmx_->SendSize("map/testMap.tmx");
+            tmx_->SendData();
+
+            IpNetwork.SendStanby();
+
+        }
+        else if (IpNetwork.GetActiv() == ActiveState::Stanby)
+        {
+            IpNetwork.NetRev();
+
+
+        }
+        else if (IpNetwork.GetActiv() == ActiveState::Play)
+        {
+
+            tmx_->LoadTmx("map/testMap.tmx");
+
+            TRACE("プレイモードに行く\n");
+            mode_ = UpdataMode::Play;
+        }
+
+
+
+    }
+    else
+    {
+
+        if (IpNetwork.GetActiv() == ActiveState::Init)
+        {
+
+
+            IpNetwork.NetRev();
+
+            //IpNetwork.SendStart();
+            //TRACE("プレイモードに行く\n");
+            //mode_ = UpdataMode::Play;
+
+        }
+        if (IpNetwork.GetActiv() == ActiveState::Stanby)
+        {
+            if (IpNetwork.revStanby_)
+            {
+
+                IpNetwork.TEST("map/test.tmx");
+                IpNetwork.SendStart();
+            }
+
+
+        }
+
+        if (IpNetwork.GetActiv() == ActiveState::Play)
+        {
+
+            tmx_->LoadTmx("map/test.tmx");
+
+
+            TRACE("プレイモードに行く\n");
+
+            mode_ = UpdataMode::Play;
+
+        }
+
+
+    }
+
+
+}
+
+void NetWork::Play()
+{
+    IpNetwork.Updata();
+
+    if (IpNetwork.GetActiv() == ActiveState::Wait)
+    {
+        mode_ = UpdataMode::SetNetWork;
+    }
+
+}
+
+UpdataMode NetWork::GetMode()
+{
+    return mode_;
+}
+
+void NetWork::ThreadUpdata(void)
+{
+
+    while (ProcessMessage() == 0)
+    {
+        func_[mode_]();
+
+    }
+
+
+
+}
+
 NetWork::NetWork()
 {
     revStanby_ = false;
+
+
+    tmx_ = std::make_unique<TmxObj>();
+
+
+    mode_ = UpdataMode::SetNetWork;
+
+    func_.try_emplace(UpdataMode::SetNetWork, std::bind(&NetWork::SetNetWork, this));
+    func_.try_emplace(UpdataMode::GetHostIP, std::bind(&NetWork::GetHostIp, this));
+    func_.try_emplace(UpdataMode::StartInit, std::bind(&NetWork::StartInit, this));
+    func_.try_emplace(UpdataMode::Play, std::bind(&NetWork::Play, this));
+
+    updata_ = std::thread(&NetWork::ThreadUpdata, this);
+
 }
 
 NetWork::~NetWork()
 {
+    updata_.detach();
 }

@@ -1,6 +1,7 @@
 #include "SceneMng.h"
 #include "Dxlib.h"
 #include"TitleScene.h"
+#include "Transition.h"
 //#include"common/_debug/_DebugConOut.h"
 //#include "common/_debug/_DebugDispOut.h"
 
@@ -16,12 +17,16 @@ void SceneMng::Run(void)
 		//AST();
 	}
 
-	activeScene_ = std::make_unique<TitleScene>();
+	Scene_ = std::make_unique<TitleScene>();
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 		//_dbgAddDraw();
-		activeScene_ = (*activeScene_).Update(std::move(activeScene_));
+		Scene_ = (*Scene_).Update(std::move(Scene_));
+		
+		Scene_->Draw();
+
+		//Scene_->Updata();
 
 
 		frames_++;
@@ -33,15 +38,7 @@ const int SceneMng::frames(void) const
 	return frames_;
 }
 
-void SceneMng::Draw(void)
-{
-	ClsDrawScreen();
-	//SetFontSize(100);
-	//DrawString(100, 100, "ó˚èK", 0xFFFFFF);
-	
-	ScreenFlip();
 
-}
 
 SceneMng::~SceneMng()
 {
