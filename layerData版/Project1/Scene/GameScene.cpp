@@ -1,8 +1,6 @@
 #include "GameScene.h"
 
 
-
-
 void GameScene::DrawOwn()
 {
 

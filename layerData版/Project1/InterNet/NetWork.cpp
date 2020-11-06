@@ -291,7 +291,7 @@ void NetWork::NetRev()
             if (data.type == MesType::GAME_START)
             {
 
-                end = std::chrono::system_clock::now();
+                //end = std::chrono::system_clock::now();
 
                 std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
 
@@ -309,11 +309,46 @@ void NetWork::NetRev()
 
 void NetWork::SetNetWork()
 {
+    std::ifstream ifp("hostIP.txt");
 
     auto ipData = IpNetwork.GetIp();
 
+
     TRACE("IPアドレス：%d.%d.%d.%d\n", ipData.d1, ipData.d2, ipData.d3, ipData.d4);
-    TRACE("0:HOSTです\n1:GESTです\n/*2:前回の接続先です*/\n3:offline\n");
+    std::vector<int> stringIp_;
+    
+    std::string getlineString_;
+
+    auto stringInt = [](std::string string) {
+    
+        return atoi(string.c_str());
+    
+    };
+
+
+    if (ifp.is_open())
+    {
+        if (!ifp.eof())
+        {
+            while (std::getline(ifp, getlineString_, '.'))
+            {
+                stringIp_.emplace_back(stringInt(getlineString_));
+                if (ifp.eof())
+                {
+                    break;
+                }
+            }
+        }
+
+        TRACE("0:オンライン【ホスト】\n1:オンライン【ゲスト】\n2:オンライン【ゲスト:%d.%d.%d.%d】\n3:offline\n", 
+            stringIp_[0], stringIp_[1], stringIp_[2], stringIp_[3]);
+
+    }
+    else
+    {
+        TRACE("0:HOSTです\n1:GESTです\n\n3:offline\n");
+
+    }
 
 
     IPDATA hostIP;					// ホストのIP
@@ -336,10 +371,12 @@ void NetWork::SetNetWork()
         else if (mode == 1)
         {
 
+
             IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
             TRACE("IPアドレスを入力してください\n");
             std::string ip, data;
             std::cin >> ip;
+
             //IPに入力された情報をホストIPに入れる
             //std::getline
             std::stringstream ipData;
@@ -358,36 +395,39 @@ void NetWork::SetNetWork()
 
             if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
             {
+                std::ofstream ofp("hostIP.txt");
+                ofp << ip;
+                ofp.close();
+
+
+
                 TRACE("ホスト接続\n");
                 mode_ = UpdataMode::StartInit;
                 TRACE("ホストからの開始合図を待ち\n");
 
-
-
             }
 
-
-            //if (IpNetwork.ConnectHost(hostIP)==ActiveState::Init)
-            {
-                //TRACE("ホスト接続\n");
-                //mode_ = UpdataMode::StartInit;
-                //TRACE("ホストからの開始合図を待ち\n");
-                //
-                //std::unique_ptr<FILE, decltype(&fclose)> fp(fopen("hostIP.txt", "wt"), fclose);
-                //
-                //fwrite(&ipData, sizeof(data), 1, &(*fp));
-                //std::ofstream fp2("hostIP.txt", std::ios::trunc);
-                //
-                //fp2 << data;
-
-            }
         }
-        else if (mode == 2)
+        else if (mode == 2&& ifp.is_open())
+        {
+            IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
+
+            hostIP.d1 = stringIp_[0];
+            hostIP.d2 = stringIp_[1];
+            hostIP.d3 = stringIp_[2];
+            hostIP.d4 = stringIp_[3];
+
+            if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
+            {
+                TRACE("ホスト接続\n");
+                mode_ = UpdataMode::StartInit;
+                TRACE("ホストからの開始合図を待ち\n");
+            }
+
+        }
+        else if(mode==3)
         {
             IpNetwork.SetNetWorkMode(NetWorkMode::OFFLINE);
-        }
-        else
-        {
 
         }
     } while (mode < 0 || mode>2);

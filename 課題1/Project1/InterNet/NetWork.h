@@ -9,7 +9,7 @@
 #define IpNetwork NetWork::GetInstance()
 
 
-using RevBox = std::vector<char>;
+using RevBox = std::vector<int>;
 
 
 enum class MesType

@@ -26,6 +26,7 @@ TitleScene::TitleScene()
 	tmx_ = std::make_unique<TmxObj>();
 	
 	//tmx_->SendData("map/testMap.tmx");
+	//tmx_->SendData("map/testMap.tmx");
 	
 	//tmx_->LoadTmx("map/test.tmx");
 
@@ -100,7 +101,7 @@ void TitleScene::SetNetWork(void)
 			TRACE("ゲスト接続待ち待機\n");
 
 			IpNetwork.SetNetWorkMode(NetWorkMode::HOST);
-			mode_ = mode_ = UpdataMode::StartInit;
+			mode_ = UpdataMode::StartInit;
 
 			
 		}
@@ -226,17 +227,25 @@ void TitleScene::StartInit()
 		{
 			tmx_->SendSize("map/testMap.tmx");
 			tmx_->SendData("map/testMap.tmx");
+
+
 			IpNetwork.SendStanby();
 
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
+			IpNetwork.NetRev();
+
+
+		}
+		else if (IpNetwork.GetActiv() == ActiveState::Play)
+		{
 			tmx_->LoadTmx("map/testMap.tmx");
 
 			TRACE("プレイモードに行く\n");
 			mode_ = UpdataMode::Play;
-
 		}
+
 
 
 	}

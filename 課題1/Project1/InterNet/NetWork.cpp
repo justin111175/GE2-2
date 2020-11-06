@@ -41,17 +41,38 @@ bool NetWork::CloseNetWork()
 
 void NetWork::TEST(std::string file)
 {
-    std::ofstream test(file);
+    std::ofstream test;
+    
+    test.open(file, std::ios::out | std::ios::binary);
+
 
     for (auto i : revtmx_)
     {
-        if (i != -1)
+        //if (i != -1)
         {
-            test.write(&i, sizeof(char));
+
+            if (i <= 0)
+            {
+                test.close();
+                break;
+
+            }
+
+            if (i <= 127)
+            {
+                break;
+
+            }
+            else
+            {
+                test.write(reinterpret_cast<char*>(&i), sizeof(int));
+
+            }
 
         }
 
     }
+
 
 
 }
@@ -180,23 +201,26 @@ void NetWork::NetRev()
             
             if (data.type == MesType::TMX_SIZE)
             {
-
-                revtmx_.resize(data.data[0]);
-
-                TRACE("ホストからのTMXもらった%d\n", revtmx_.size());
+                //if (revtmx_.size() > data.data[0])
+                {
+                    revtmx_.resize(data.data[0]);
+                }
+                TRACE("ホストからのTMXもらった%d\n", data.data[0]);
 
             }
 
             if (data.type == MesType::TMX_DATA)
             {
 
-
-                revtmx_[data.data[0]] = data.data[1];
+                if (revtmx_.size() >= data.data[0])
+                {
+                    revtmx_.at(data.data[0]) = data.data[1];
                 
 
-                TRACE("ID : %d\n", data.data[0]);
-                TRACE("DATA : %d\n", data.data[1]);
+                    TRACE("ID : %d , DATA : %d\n", data.data[0], data.data[1]);
 
+
+                }
             }
 
 
@@ -217,7 +241,19 @@ void NetWork::NetRev()
     }
     else
     {
+        int handle = state_->GetHandle();
+        MesData data;
+        if (sizeof(data) <= GetNetWorkDataLength(handle))
+        {
+            NetWorkRecv(handle, &data, sizeof(data));
 
+
+            if (data.type == MesType::GAME_START)
+            {
+                state_->SetActive(ActiveState::Play);
+            }
+
+        }
     }
 
 
