@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
 
@@ -16,9 +15,6 @@ struct Layer
 	std::vector<int> data;
 };
 
-
-
-
 struct Tileset {
     std::string name;
     int tileWidth;
@@ -33,7 +29,6 @@ struct Tileset {
 
 };
 
-
 class TmxObj
 {
 public:
@@ -44,9 +39,6 @@ public:
 	void LoadTsx(const char* tsx);
 	void Draw();
     Tileset tileset;
-	bool SendTmxSize(std::string file);
-
-
 
 	void SendTmx();
 private:

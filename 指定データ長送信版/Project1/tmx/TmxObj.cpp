@@ -25,7 +25,7 @@ TmxObj::~TmxObj()
 
 void TmxObj::LoadTmx(const char* tmx)
 {
-
+	TRACE("マップ初期化開始\n");
 
 	rapidxml::xml_document<> doc;
 	rapidxml::file<> input(tmx);
@@ -60,9 +60,8 @@ void TmxObj::LoadTmx(const char* tmx)
 
 		layer_.try_emplace(i.first, StringChange(layerData_[i.first]));
 
-
-
 	}
+	TRACE("マップ初期化完了\n");
 
 }
 
@@ -116,19 +115,7 @@ void TmxObj::Draw()
 	}
 }
 
-bool TmxObj::SendTmxSize(std::string file)
-{
-	std::ifstream ifp(file);
-	ifp.seekg(0, std::ios_base::end);
 
-	//MesPacket data;
-
-	//IpNetwork.SetHeader(Header{ MesType::TMX_SIZE,0,0,0 }, data);
-	IpNetwork.SendMes(MesType::TMX_SIZE);
-	
-	return true;
-
-}
 
 void TmxObj::SendTmx()//host
 {
@@ -178,26 +165,19 @@ void TmxObj::SendTmx()//host
 					while (std::getline(strInt, string, ','))
 					{
 						
-						//VecInt.emplace_back(atoi(string.c_str()));
-
-						//data.insert(data.end(), { unionD.uiData });
 
 						int tmpcnt = cnt / 2;
 						if (cnt % 2 == 0)
 						{
 							
 							unionD.cData[tmpcnt] = atoi(string.c_str());
-							std::cout << atoi(string.c_str()) ;
+							//std::cout << atoi(string.c_str()) ;
 						}
 						else
 						{
 							unionD.cData[tmpcnt] += atoi(string.c_str()) << 4;
-							std::cout << atoi(string.c_str());
-							//VecInt.emplace_back(atoi(string.c_str()));
-
+							//std::cout << atoi(string.c_str());
 						}
-						
-
 
 						if (cnt != 7)
 						{

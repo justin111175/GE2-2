@@ -18,49 +18,42 @@ enum class UpdataMode
 	GetHostIP,
 	StartInit,
 	Play
-
-
 };
 
 enum class MesType:unsigned char
 {
 	NON=100,
-	STANDY,					// 初期化情報送信完了（ホスト用）
-	GAME_START,				// ホストからの初期化情報での初期化完了
+	STANDY,							// 初期化情報送信完了（ホスト用）
+	GAME_START,						// ホストからの初期化情報での初期化完了
 	TMX_SIZE,
 	TMX_DATA,
 	POS
 };
 
-struct MesHeader//8
+struct MesHeader
 {
 
-	MesType type;//1
+	MesType type;
 	unsigned char next;				// データ送信が分割の場合に、次がある場合：1　、ない場合：0
-	unsigned short sendID;//2		// 分割送信時のナンバリング
-	unsigned int length;//4
+	unsigned short sendID;			// 分割送信時のナンバリング
+	unsigned int length;			// 分割かどうかに関わらず、単一バケットのデータ長（intの数）
 
 };
 union UnionData
 {
-	unsigned int uiData;//4
-	int iData;//4
-	char cData[4];//4
+	unsigned int uiData;
+	int iData;
+	char cData[4];
 };
 
 union Header
 {
-	MesHeader mesheader;//8
+	MesHeader mesheader;
 	unsigned int header[2];
 };
 
-
-
 using MesPacket = std::vector<UnionData>;
-
 using RevBox = std::vector<UnionData>;
-
-
 class NetWork
 {
 public:
