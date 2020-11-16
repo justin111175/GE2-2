@@ -120,7 +120,7 @@ void TmxObj::Draw()
 void TmxObj::SendTmx()//host
 {
 
-	std::ifstream ifp("map/testMap.tmx");
+	std::ifstream ifp("map/ObjTest.tmx");
 
 
 	UnionData unionD;

@@ -45,7 +45,6 @@ unique_Base TitleScene::Update(unique_Base own)
 	{
 
 		return std::make_unique<Transition>(std::move(own), SceneChange::Title_GO_Login);
-		//return std::make_unique<LoginScene>();
 	}
 
 
@@ -67,12 +66,11 @@ void TitleScene::Init(void)
 
 void TitleScene::Draw()
 {
-	ClsDrawScreen();
 
 	SetDrawScreen(screenID_);
+	ClsDrawScreen();
 
 	DrawOwn();
-	ScreenFlip();
 
 }
 

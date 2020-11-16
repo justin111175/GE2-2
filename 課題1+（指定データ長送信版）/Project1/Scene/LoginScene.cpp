@@ -42,12 +42,11 @@ LoginScene::LoginScene()
 	
 	GetDrawScreenSize(&screen_size_.x,&screen_size_.y);
 
-	ipData = IpNetwork.GetIp();
 	meanID_ = LoginMean_ID::HOST;
 	mode_ = UpdataMode::SetNetWork;
 	testFlag_ = false;
-	//Draw();
-	//IpNetwork.updata_;
+	ipData = IpNetwork.GetIp();
+
 
 }
 
@@ -111,6 +110,7 @@ void LoginScene::Ctl(conType input)
 					break;
 				case LoginMean_ID::NON:
 					IpNetwork.SetNetWorkMode(NetWorkMode::OFFLINE);
+					mode_ = UpdataMode::Play;
 					break;
 				default:
 					break;
@@ -127,6 +127,7 @@ void LoginScene::HOST()
 {
 	TRACE("ゲスト接続待ち待機\n");
 	IpNetwork.SetNetWorkMode(NetWorkMode::HOST);
+	IpNetwork.Flag_ = true;
 	mode_ = UpdataMode::StartInit;
 
 }
@@ -166,6 +167,8 @@ void LoginScene::GEST()
 		ofp.close();
 
 		TRACE("ホスト接続\n");
+		IpNetwork.Flag_ = true;
+
 		mode_ = UpdataMode::StartInit;
 		TRACE("ホストからの開始合図を待ち\n");
 
@@ -178,34 +181,8 @@ void LoginScene::SetNetWork()
 {
 	std::ifstream ifp("ini/hostIP.txt");
 
-	ipData = IpNetwork.GetIp();
-	
 	Ctl(conType::Key);
 
-
-
-	//	else if (mode == 2 && ifp.is_open())
-	//	{
-	//		IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
-
-	//		hostIP.d1 = stringIp_[0];
-	//		hostIP.d2 = stringIp_[1];
-	//		hostIP.d3 = stringIp_[2];
-	//		hostIP.d4 = stringIp_[3];
-
-	//		if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
-	//		{
-	//			TRACE("ホスト接続\n");
-	//			mode_ = UpdataMode::StartInit;
-	//			TRACE("ホストからの開始合図を待ち\n");
-	//		}
-
-	//	}
-	//	else if (mode == 3)
-	//	{
-	//		IpNetwork.SetNetWorkMode(NetWorkMode::OFFLINE);
-
-	//	}
 }
 
 void LoginScene::GetHostIp()
@@ -222,7 +199,7 @@ void LoginScene::GetHostIp()
 
 void LoginScene::StartInit()
 {
-	IpNetwork.Updata();
+	//IpNetwork.Updata();
 
 	if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
@@ -242,7 +219,7 @@ void LoginScene::StartInit()
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
-			IpNetwork.tmx_->LoadTmx("map/testMap.tmx");
+			IpNetwork.tmx_->LoadTmx("map/ObjTest.tmx");
 
 			TRACE("プレイモードに行く\n");
 			mode_ = UpdataMode::Play;
@@ -251,11 +228,11 @@ void LoginScene::StartInit()
 	else
 	{
 
-		if (IpNetwork.GetActiv() == ActiveState::Init)
-		{
-			IpNetwork.NetRev();
+		//if (IpNetwork.GetActiv() == ActiveState::Init)
+		//{
+		//	IpNetwork.NetRev();
 
-		}
+		//}
 		if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
 			if (IpNetwork.revStanby_)
@@ -283,7 +260,7 @@ void LoginScene::StartInit()
 
 void LoginScene::Play()
 {
-	IpNetwork.Updata();
+	//IpNetwork.Updata();
 	testFlag_ = true;
 	if (IpNetwork.GetActiv() == ActiveState::Wait)
 	{
@@ -299,7 +276,7 @@ void LoginScene::Draw()
 
 	DrawOwn();
 
-	ScreenFlip();
+	//ScreenFlip();
 }
 
 void LoginScene::DrawOwn()
@@ -319,19 +296,35 @@ void LoginScene::DrawOwn()
 	DrawFormatString(300,250,0xffffff,"IPアドレス：%d.%d.%d.%d\n", ipData.d1, ipData.d2, ipData.d3, ipData.d4);
 	SetFontSize(30);
 
+
+
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 125);
 	DrawBox(300, 320 + static_cast<int>(meanID_) * 50, 660, 360 + static_cast<int>(meanID_) * 50, 0xFFFFFF, true);
-
-
 	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
-
-
-
 	for (auto i : mean_)
 	{
 		DrawString(300, 320 + static_cast<int>(i.first) * 50, i.second, 0xffffff, true);
 
 	}
+	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 230);
+	//SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
+	
+	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, sin((double)IpSceneMng.frames()/10)*255);
+	//if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+	//{
+	//	if (mode_ != UpdataMode::SetNetWork)
+	//	{
+	//		if (!IpNetwork.Updata())
+	//		{
+	//			DrawBox(300, 300 , 660, 450, 0x000000, true);
+	//			DrawBoxAA(300, 300 , 660, 450, 0xFFFFFF, false);
+	//			DrawString(340, 350, "ゲスト接続待ち待機", 0xFFFFFF, true);
+
+	//		}
+
+	//	}
+
+	//}
 
 
 

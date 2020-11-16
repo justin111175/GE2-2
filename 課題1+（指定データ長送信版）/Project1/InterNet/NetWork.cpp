@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <bitset>
+#include "OffLine.h"
 
 IPDATA NetWork::GetIp(void)
 {
@@ -228,6 +229,23 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
         }
 
     }
+
+    if (type == MesType::POS)
+    {
+
+        // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
+        //if (sendSize >= mesPacket.size())
+        {
+            //SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
+            SetHeader(Header{ type,0,0,4 }, mesPacket);
+
+            NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
+            TRACE("送信した\n");
+            return true;
+        }
+
+
+    }
     return false;
 }
 
@@ -269,8 +287,6 @@ void NetWork::SendStanby(void)//host
 {
     revStanby_ = true;
 
-    
-
     if (SendMes(MesType::STANDY))
     {
         TRACE("STANDYを送る\n");
@@ -279,9 +295,6 @@ void NetWork::SendStanby(void)//host
 
     }
 
-
-
-    
 }
 
 void NetWork::SendStart()   //gset
@@ -310,6 +323,7 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
     switch (mode)
     {
     case NetWorkMode::OFFLINE:
+        state_ = std::make_unique<OffLine>();
         break;
     case NetWorkMode::HOST:
         state_ = std::make_unique<HostState>();
@@ -348,6 +362,8 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
 
 NetWorkMode NetWork::GetNetWorkMode(void)
 {
+   // std::lock_guard<std::mutex> lock(mtx);
+
     return state_->GetMode();
 }
 
@@ -363,6 +379,8 @@ ActiveState NetWork::GetActiv(void)
 
 void NetWork::NetRev()
 {
+    //std::lock_guard<std::mutex> lock(mtx);
+
     if (NetWorkMode::GEST == GetNetWorkMode())
     {
         int handle=state_->GetHandle();
@@ -420,11 +438,27 @@ void NetWork::NetRev()
             // TYPEがSTANDYの場合
             if (revMesHeader_.type == MesType::STANDY)
             {
+                std::lock_guard<std::mutex> lock(mtx);
+
                 revStanby_ = true;
                 std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
                 TRACE("時間　：　%d秒\n", s.count());
                 state_->SetActive(ActiveState::Stanby);
                 TRACE("ホストからのスタンバイもらった\n");
+
+            }
+            if (revMesHeader_.type == MesType::POS)
+            {
+                // ヘッダーの部分確保する
+                revPacket_.resize(revMesHeader_.length);
+                NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+                
+                palyerList_.push_back(revPacket_);
+                mapID_.try_emplace(revPacket_[0].iData);
+                mapID_[revPacket_[0].iData].push_back(revPacket_);
+                //palyerList_.clear();
+                TRACE("posもらった\n");
+
 
             }
 
@@ -434,6 +468,8 @@ void NetWork::NetRev()
     {
         int handle = state_->GetHandle();
         MesHeader data;
+        MesPacket revPacket_;
+
         if (sizeof(data) <= GetNetWorkDataLength(handle))
         {
             NetWorkRecv(handle, &data, sizeof(data));
@@ -444,6 +480,19 @@ void NetWork::NetRev()
                 std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
                 TRACE("時間　：　%d秒\n", s.count());
                 state_->SetActive(ActiveState::Play);
+            }
+
+            if (data.type == MesType::POS)
+            {
+                // ヘッダーの部分確保する
+                revPacket_.resize(data.length);
+                NetWorkRecv(handle, revPacket_.data(), data.length * 4);
+               
+                palyerList_.push_back(revPacket_);
+                mapID_.try_emplace(revPacket_[0].iData);
+                mapID_[revPacket_[0].iData].push_back(revPacket_);
+                TRACE("posもらった\n");
+
             }
 
         }
@@ -615,7 +664,7 @@ void NetWork::StartInit()
         }
         else if (GetActiv() == ActiveState::Play)
         {
-            tmx_->LoadTmx("map/testMap.tmx");
+            tmx_->LoadTmx("map/ObjTest.tmx");
             
             TRACE("プレイモードに行く\n");
             mode_ = UpdataMode::Play;
@@ -669,12 +718,51 @@ UpdataMode NetWork::GetMode()
     return mode_;
 }
 
+MesPacket NetWork::GetList(int id)
+{       
+    MesPacket data;
+
+    //if (mapID_[id].size())
+    //{
+    //    data = mapID_[id].front();
+    //    mapID_[id].erase(mapID_[id].begin());
+    //}
+
+    if (mapID_[id].size() >= 1)
+    {
+        if (mapID_[id].size() == 1)
+        {
+            data=mapID_[id].front();
+            mapID_[id].erase(mapID_[id].begin());
+        }
+        else
+        {
+            data = mapID_[id].back();
+            mapID_[id].clear();
+        }
+    }
+
+    return data;
+
+
+}
+
 void NetWork::ThreadUpdata(void)
 {
 
     while (ProcessMessage() == 0)
     {
-        
+
+        if (!Flag_)
+        {
+            continue;
+        }
+        if (state_->Updata())
+        {
+            NetRev();
+
+        }
+
     }
 
 
@@ -689,21 +777,17 @@ NetWork::NetWork()
     tmx_ = std::make_unique<TmxObj>();
 
 
-    mode_ = UpdataMode::SetNetWork;
 
-    //func_.try_emplace(UpdataMode::SetNetWork, std::bind(&NetWork::SetNetWork, this));
-    //func_.try_emplace(UpdataMode::GetHostIP, std::bind(&NetWork::GetHostIp, this));
-    //func_.try_emplace(UpdataMode::StartInit, std::bind(&NetWork::StartInit, this));
-    //func_.try_emplace(UpdataMode::Play, std::bind(&NetWork::Play, this));
+
 
     // 1回送信する大きさをとる
     GetSetting("ini/setting.txt");
 
-    //updata_ = std::thread(&NetWork::ThreadUpdata, this);
+    updata_ = std::thread(&NetWork::ThreadUpdata, this);
 
 }
 
 NetWork::~NetWork()
 {
-    //updata_.detach();
+    updata_.detach();
 }

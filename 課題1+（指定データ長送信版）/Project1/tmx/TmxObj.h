@@ -41,13 +41,14 @@ public:
     Tileset tileset;
 
 	void SendTmx();
+	std::map<std::string, std::vector<int>> layer_;
+
 private:
 
 	std::map<std::string,std::string> layerData_;
 	std::map<std::string, std::string> mapData_;
 
 
-	std::map<std::string, std::vector<int>> layer_;
 	std::vector<int> StringChange(std::string string);
 };
 

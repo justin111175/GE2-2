@@ -8,7 +8,8 @@
 #include <thread>
 #include "../tmx/TmxObj.h"
 #include <memory>
-
+#include <list>
+#include <mutex>
 #define IpNetwork NetWork::GetInstance()
 
 
@@ -52,8 +53,8 @@ union Header
 	unsigned int header[2];
 };
 
+
 using MesPacket = std::vector<UnionData>;
-using RevBox = std::vector<UnionData>;
 class NetWork
 {
 public:
@@ -115,18 +116,26 @@ public:
 	
 	unsigned int intSendCount_;
 
+
+	int dir_;
+	Vector2 pos_;
+	std::map<int,std::list<MesPacket>> mapID_;
+	std::list<MesPacket> palyerList_;
+	MesPacket posPacket_;
+	
+	MesPacket GetList(int id);
+	bool Flag_ = false;
 private:
 
 	UpdataMode mode_;
 	std::map<UpdataMode, std::function<void(void)>> func_;
 
-
-
+	std::mutex mtx;
 
 
 	void ThreadUpdata(void);
 
-	RevBox revtmx_;
+	MesPacket revtmx_;
 
 
 	std::map<ActiveState, std::function<bool(void)>> funcAct_;

@@ -53,7 +53,7 @@ void CrossOver::DrawOwn()
 
 
 
-	ScreenFlip();
+	//ScreenFlip();
 
 
 

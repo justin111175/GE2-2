@@ -24,7 +24,6 @@ Transition::Transition(unique_Base own,SceneChange scene_)
 	switch (scene_)
 	{
 	case SceneChange::Title_GO_Login:
-		//tranScene_ = std::make_unique<TitleScene>();
 		childScene_[1]= std::make_unique<LoginScene>();
 		break;
 	case SceneChange::Login_GO_Game:

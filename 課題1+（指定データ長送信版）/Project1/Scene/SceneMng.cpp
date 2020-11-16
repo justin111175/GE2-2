@@ -2,9 +2,9 @@
 #include "Dxlib.h"
 #include"TitleScene.h"
 #include "Transition.h"
-//#include"common/_debug/_DebugConOut.h"
-//#include "common/_debug/_DebugDispOut.h"
-
+#include "../common/_debug/_DebugConOut.h"
+#include "../common/_debug/_DebugDispOut.h"
+#include "GameScene.h"
 SceneMng* SceneMng::sInstance = nullptr;
 
 
@@ -21,13 +21,15 @@ void SceneMng::Run(void)
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
-		//_dbgAddDraw();
+		_dbgStartDraw();
+
 		Scene_ = (*Scene_).Update(std::move(Scene_));
 		
+		SetDrawScreen(DX_SCREEN_BACK);
+
  		Scene_->Draw();
-
-		//Scene_->Updata();
-
+		_dbgAddDraw();
+		ScreenFlip();
 
 		frames_++;
 	}
@@ -64,7 +66,7 @@ bool SceneMng::SysInit(void)
 		return false;
 	}
 
-
+	_dbgSetup(screenSize.x, screenSize.y, 255);
 
 	return true;
 

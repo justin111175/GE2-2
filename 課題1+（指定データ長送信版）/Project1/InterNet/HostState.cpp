@@ -37,6 +37,7 @@ bool HostState::CheckNetWork()
 		netHandle_ = tmpID;
 		StopListenNetWork();
 		active_ = ActiveState::Init;
+		return true;
 	}
 
 	if (GetLostNetWork() != -1)
