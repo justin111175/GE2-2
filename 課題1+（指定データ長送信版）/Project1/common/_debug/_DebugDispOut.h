@@ -44,6 +44,7 @@ public:
 	void SetScreen(void);
 	void RevScreen(void);
 	void WaitMode(void);
+	void FPS(void);
 private:
 	struct _DebugDispOutDeleter
 	{
@@ -68,6 +69,9 @@ private:
 	int homeKey_[2];
 	int f1Key_[2];
 	int DbgScreen_;
+	int cnt_;
+	int FPScnt_;
+
 };
 #else
 

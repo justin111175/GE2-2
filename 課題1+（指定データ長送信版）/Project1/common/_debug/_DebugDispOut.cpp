@@ -17,6 +17,7 @@ _DebugDispOut::_DebugDispOut()
 	pouseKey_[1] = 0;
 	ghBefor_ = 0;
 	clsFlag_ = true;
+	cnt_ = 0;
 }
 
 _DebugDispOut::~_DebugDispOut()
@@ -102,6 +103,30 @@ void _DebugDispOut::WaitMode(void)
 	}
 }
 
+void _DebugDispOut::FPS(void)
+{
+
+	endTime_ = std::chrono::system_clock::now();
+
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(endTime_ - startTime_).count() <= std::chrono::milliseconds(1000).count())
+	{
+		cnt_++;
+	}
+	else
+	{
+		startTime_ = std::chrono::system_clock::now();
+		FPScnt_ = cnt_;
+		cnt_ = 0;
+	}
+
+	_dbgDrawBox(0, 0, 150, 20, 0x000000, true);
+	SetFontSize(20);
+	
+	
+	_dbgDrawFormatString(0, 0, 0xffffff, "FPS : 1 / %d", FPScnt_);
+
+}
+
 int _DebugDispOut::DrawGraph(int x, int y, int GrHandle, int TransFlag)
 {
 	SetScreen();
@@ -170,6 +195,8 @@ bool _DebugDispOut::StartDrawDebug(void)
 	{
 		ClsDrawScreen();
 	}
+	FPS();
+
 	SetDrawScreen(ghBefor);
 	return true;
 }

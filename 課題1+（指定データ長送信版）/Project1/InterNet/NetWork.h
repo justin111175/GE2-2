@@ -124,11 +124,13 @@ public:
 	MesPacket posPacket_;
 	
 	MesPacket GetList(int id);
-	bool Flag_ = false;
 private:
+	std::map<MesType, std::function<void(void)>> revFunc_;
+
+	void RevInit();
+
 
 	UpdataMode mode_;
-	std::map<UpdataMode, std::function<void(void)>> func_;
 
 	std::mutex mtx;
 
@@ -137,8 +139,6 @@ private:
 
 	MesPacket revtmx_;
 
-
-	std::map<ActiveState, std::function<bool(void)>> funcAct_;
 	std::vector<int> layerData;
 
 	std::unique_ptr<NetWorkState> state_;

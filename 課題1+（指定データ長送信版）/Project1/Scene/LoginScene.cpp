@@ -127,7 +127,6 @@ void LoginScene::HOST()
 {
 	TRACE("ゲスト接続待ち待機\n");
 	IpNetwork.SetNetWorkMode(NetWorkMode::HOST);
-	IpNetwork.Flag_ = true;
 	mode_ = UpdataMode::StartInit;
 
 }
@@ -167,7 +166,6 @@ void LoginScene::GEST()
 		ofp.close();
 
 		TRACE("ホスト接続\n");
-		IpNetwork.Flag_ = true;
 
 		mode_ = UpdataMode::StartInit;
 		TRACE("ホストからの開始合図を待ち\n");

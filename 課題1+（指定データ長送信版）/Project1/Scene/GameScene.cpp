@@ -26,7 +26,7 @@ void GameScene::DrawOwn()
 	}
 
 	SetFontSize(50);
-	DrawString(0, 0, "Game  Scene", 0x000000, 0xFFFFFF);
+	//DrawString(0, 0, "Game  Scene", 0x000000, 0xFFFFFF);
 }
 
 
@@ -35,7 +35,6 @@ unique_Base GameScene::Update(unique_Base own)
 {
 
 	Draw();
-	_dbgDrawFormatString(500, 500, 0xffffff, "TEST");
 
 	for (auto& player : play_)
 	{
