@@ -380,122 +380,121 @@ ActiveState NetWork::GetActiv(void)
 void NetWork::NetRev()
 {
 
-    if (NetWorkMode::GEST == GetNetWorkMode())
-    {
-        int handle=state_->GetHandle();
-        MesHeader revMesHeader_;
-        MesPacket revPacket_;
+    //if (NetWorkMode::GEST == GetNetWorkMode())
+    //{
+    //    int handle=state_->GetHandle();
+    //    MesHeader revMesHeader_;
+    //    MesPacket revPacket_;
 
-        if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
-        {
-            // 受信
-            NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
+    //    if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
+    //    {
+    //        // 受信
+    //        NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
 
-            // TYPEがサイズの場合
-            if (revMesHeader_.type == MesType::TMX_SIZE)
-            {
-                start = std::chrono::system_clock::now();
-                // ヘッダーの部分確保する
-                revPacket_.resize(revMesHeader_.length);
-                NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-                // データサイズをとる
-                TRACE("TMX_SIZE : %d\n", revMesHeader_.length * 4);
-            }
-            
-            // TYPEがデータの場合
-            if (revMesHeader_.type == MesType::TMX_DATA)
-            {
-                // 最初のパゲットを確保して、とる
-                revPacket_.resize(revMesHeader_.length);
-                NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);     
+    //        // TYPEがサイズの場合
+    //        if (revMesHeader_.type == MesType::TMX_SIZE)
+    //        {
+    //            start = std::chrono::system_clock::now();
+    //            // ヘッダーの部分確保する
+    //            revPacket_.resize(revMesHeader_.length);
+    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+    //            // データサイズをとる
+    //            TRACE("TMX_SIZE : %d\n", revMesHeader_.length * 4);
+    //        }
+    //        
+    //        // TYPEがデータの場合
+    //        if (revMesHeader_.type == MesType::TMX_DATA)
+    //        {
+    //            // 最初のパゲットを確保して、とる
+    //            revPacket_.resize(revMesHeader_.length);
+    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);     
 
-                do
-                {
-                    // パゲットがない場合新しい情報をとって、確保する
-                    if (revPacket_.size() == 0)
-                    {
-                        NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
-                        revPacket_.resize(revMesHeader_.length);
-                        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-                    }
-                    // 確保したデータを後ろに追加する
-                    for (int i = 0; i < revPacket_.size(); i++)
-                    {
-                        revtmx_.insert(revtmx_.end(), { revPacket_[i] });
-                    }
-                    // もし次がある場合、パゲットを消す
-                    if (revMesHeader_.next !=0)
-                    {
-                        revPacket_.clear();
-                    }
-                    // パゲットがない場合、ループする
-                } while (revPacket_.size()==0);
+    //            do
+    //            {
+    //                // パゲットがない場合新しい情報をとって、確保する
+    //                if (revPacket_.size() == 0)
+    //                {
+    //                    NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
+    //                    revPacket_.resize(revMesHeader_.length);
+    //                    NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+    //                }
+    //                // 確保したデータを後ろに追加する
+    //                for (int i = 0; i < revPacket_.size(); i++)
+    //                {
+    //                    revtmx_.insert(revtmx_.end(), { revPacket_[i] });
+    //                }
+    //                // もし次がある場合、パゲットを消す
+    //                if (revMesHeader_.next !=0)
+    //                {
+    //                    revPacket_.clear();
+    //                }
+    //                // パゲットがない場合、ループする
+    //            } while (revPacket_.size()==0);
 
-                end = std::chrono::system_clock::now();
-            }
-            
-            // TYPEがSTANDYの場合
-            if (revMesHeader_.type == MesType::STANDY)
-            {
-                std::lock_guard<std::mutex> lock(mtx);
+    //            end = std::chrono::system_clock::now();
+    //        }
+    //        
+    //        // TYPEがSTANDYの場合
+    //        if (revMesHeader_.type == MesType::STANDY)
+    //        {
+    //            std::lock_guard<std::mutex> lock(mtx);
 
-                revStanby_ = true;
-                std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-                TRACE("時間　：　%d秒\n", s.count());
-                state_->SetActive(ActiveState::Stanby);
-                TRACE("ホストからのスタンバイもらった\n");
+    //            revStanby_ = true;
+    //            std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
+    //            TRACE("時間　：　%d秒\n", s.count());
+    //            state_->SetActive(ActiveState::Stanby);
+    //            TRACE("ホストからのスタンバイもらった\n");
 
-            }
-            if (revMesHeader_.type == MesType::POS)
-            {
-                // ヘッダーの部分確保する
-                revPacket_.resize(revMesHeader_.length);
-                NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-                
-                palyerList_.push_back(revPacket_);
-                mapID_.try_emplace(revPacket_[0].iData);
-                mapID_[revPacket_[0].iData].push_back(revPacket_);
-                //palyerList_.clear();
-               // TRACE("posもらった\n");
+    //        }
+    //        if (revMesHeader_.type == MesType::POS)
+    //        {
+    //            // ヘッダーの部分確保する
+    //            revPacket_.resize(revMesHeader_.length);
+    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+    //            
+    //            VecID_.emplace_back(revPacket_);
+
+    //            //palyerList_.clear();
+    //           // TRACE("posもらった\n");
 
 
-            }
+    //        }
 
-        }
-    }
-    else
-    {
-        int handle = state_->GetHandle();
-        MesHeader data;
-        MesPacket revPacket_;
+    //    }
+    //}
+    //else
+    //{
+    //    int handle = state_->GetHandle();
+    //    MesHeader data;
+    //    MesPacket revPacket_;
 
-        if (sizeof(data) <= GetNetWorkDataLength(handle))
-        {
-            NetWorkRecv(handle, &data, sizeof(data));
+    //    if (sizeof(data) <= GetNetWorkDataLength(handle))
+    //    {
+    //        NetWorkRecv(handle, &data, sizeof(data));
 
-            if (data.type == MesType::GAME_START)
-            {
-                end = std::chrono::system_clock::now();
-                std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-                TRACE("時間　：　%d秒\n", s.count());
-                state_->SetActive(ActiveState::Play);
-            }
+    //        if (data.type == MesType::GAME_START)
+    //        {
+    //            end = std::chrono::system_clock::now();
+    //            std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
+    //            TRACE("時間　：　%d秒\n", s.count());
+    //            state_->SetActive(ActiveState::Play);
+    //        }
 
-            if (data.type == MesType::POS)
-            {
-                // ヘッダーの部分確保する
-                revPacket_.resize(data.length);
-                NetWorkRecv(handle, revPacket_.data(), data.length * 4);
-               
-                palyerList_.push_back(revPacket_);
-                mapID_.try_emplace(revPacket_[0].iData);
-                mapID_[revPacket_[0].iData].push_back(revPacket_);
-                //TRACE("posもらった\n");
+    //        if (data.type == MesType::POS)
+    //        {
+    //            // ヘッダーの部分確保する
+    //            revPacket_.resize(data.length);
+    //            NetWorkRecv(handle, revPacket_.data(), data.length * 4);
+    //           
+    //            palyerList_.push_back(revPacket_);
+    //            VecID_.try_emplace(revPacket_[0].iData);
+    //            VecID_[revPacket_[0].iData].push_back(revPacket_);
+    //            //TRACE("posもらった\n");
 
-            }
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
 }
 
@@ -717,36 +716,56 @@ UpdataMode NetWork::GetMode()
     return mode_;
 }
 
-MesPacket NetWork::GetList(int id)
+MesPacket NetWork::GetPacket(int id)
 {       
-    MesPacket data;
+    std::lock_guard<std::mutex> lock(mtx);
 
-    if (mapID_[id].size() >= 1)
+    MesPacket data_;
+
+    if (VecID_.size())
     {
-        if (mapID_[id].size() == 1)
+        for (auto& data : VecID_)
         {
-            data=mapID_[id].front();
-            mapID_[id].erase(mapID_[id].begin());
-        }
-        else
-        {
-            data = mapID_[id].back();
-            mapID_[id].clear();
+            if (data.data())
+            {
+                if (data[0].iData == id)
+                {
+                    data_ = data;
+                    data[0].iData = -1;
+                }
+            }
+            else
+            {
+                data = MesPacket{ UnionData{0} };
+                data[0].iData = -1;
+            }
+
         }
     }
 
-    return data;
+    return data_;
+}
+
+void NetWork::EraserPac()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+
+    auto itr = std::remove_if(VecID_.begin(), VecID_.end(), [](MesPacket& data) {return data[0].iData == -1; });
+
+    if (itr!= VecID_.end())
+    {
+        VecID_.erase(itr, VecID_.end());
+    }
+
+
+
 }
 
 void NetWork::RevInit()
 {
 
 
-    int handle = state_->GetHandle();
-    MesHeader revMesHeader_;
-    MesPacket revPacket_;
-
-    revFunc_.try_emplace(MesType::TMX_SIZE, [&]() {
+    revFunc_.try_emplace(MesType::TMX_SIZE, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         start = std::chrono::system_clock::now();
         // ヘッダーの部分確保する
@@ -758,7 +777,7 @@ void NetWork::RevInit()
         
         
         });
-    revFunc_.try_emplace(MesType::TMX_DATA, [&]() {
+    revFunc_.try_emplace(MesType::TMX_DATA, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         // 最初のパゲットを確保して、とる
         revPacket_.resize(revMesHeader_.length);
@@ -791,7 +810,7 @@ void NetWork::RevInit()
 
 
         });
-    revFunc_.try_emplace(MesType::STANDY, [&]() {
+    revFunc_.try_emplace(MesType::STANDY, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         std::lock_guard<std::mutex> lock(mtx);
 
@@ -804,7 +823,7 @@ void NetWork::RevInit()
 
 
         });
-    revFunc_.try_emplace(MesType::GAME_START, [&]() {
+    revFunc_.try_emplace(MesType::GAME_START, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         end = std::chrono::system_clock::now();
         std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
@@ -814,15 +833,13 @@ void NetWork::RevInit()
 
 
         });
-    revFunc_.try_emplace(MesType::POS, [&]() {
+    revFunc_.try_emplace(MesType::POS, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         // ヘッダーの部分確保する
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
-        palyerList_.push_back(revPacket_);
-        mapID_.try_emplace(revPacket_[0].iData);
-        mapID_[revPacket_[0].iData].push_back(revPacket_);
+        VecID_.emplace_back(revPacket_);
 
 
 
@@ -851,20 +868,25 @@ void NetWork::ThreadUpdata(void)
 
     while (ProcessMessage() == 0&&GetLostNetWork()==-1)
     {
-        //NetRev();
-        int handle = state_->GetHandle();
-
-        MesHeader revMesHeader_;
-        MesPacket revPacket_;
-
-        if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
+        if (state_->Updata())
         {
-            // 受信
-            NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
 
-            if (revMesHeader_.type <= MesType::POS)
+
+
+            int handle = state_->GetHandle();
+
+            MesHeader revMesHeader_;
+            MesPacket revPacket_;
+
+            if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
             {
-                revFunc_[revMesHeader_.type]();
+                // 受信
+                NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
+
+                if (revMesHeader_.type <= MesType::POS)
+                {
+                    revFunc_[revMesHeader_.type](handle, revMesHeader_, revPacket_);
+                }
             }
         }
     }

@@ -32,6 +32,7 @@ private:
 
 	void HOST();
 	void GEST();
+	void B_GEST();
 
 	std::map<UpdataMode, std::function<void(void)>> func_;
 
@@ -47,5 +48,8 @@ private:
 
 	char Name[31];
 	bool testFlag_;
+	
+	std::vector<int> stringIp_;
+
 };
 

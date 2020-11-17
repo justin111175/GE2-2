@@ -3,6 +3,8 @@
 #include <Dxlib.h>
 #include "Scene/SceneMng.h"
 #include "InterNet/NetWork.h"
+	
+int Character::fallCnt_ = 0;
 
 Character::Character(std::vector<int> mapDataBase, std::vector<int*> mapData, Vector2 pos, int id)
 {
@@ -16,7 +18,6 @@ Character::Character(std::vector<int> mapDataBase, std::vector<int*> mapData, Ve
 	mapData_= mapData;
 
 	id_ = id;
-
 }
 
 Character::~Character()
@@ -90,7 +91,7 @@ void Character::SendData()
 void Character::RevData()
 {
 	MesPacket data;
-	data = IpNetwork.GetList(id_);
+	data = IpNetwork.GetPacket(id_);
 	if (data.size())
 	{
 		id_ = data[0].iData;
@@ -98,6 +99,11 @@ void Character::RevData()
 		dir_ = static_cast<DIR>(data[3].iData);
 
 	}
+	else
+	{
+		fallCnt_++;
+	}
+
 
 }
 

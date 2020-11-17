@@ -23,9 +23,11 @@ void GameScene::DrawOwn()
 	for (auto& player : play_)
 	{
 		player->Draw();
+
 	}
 
-	SetFontSize(50);
+	//SetFontSize(50);
+
 	//DrawString(0, 0, "Game  Scene", 0x000000, 0xFFFFFF);
 }
 
@@ -40,7 +42,24 @@ unique_Base GameScene::Update(unique_Base own)
 	{
 		player->Updata();
 	}
+	IpNetwork.EraserPac();
 	
+	end_ = std::chrono::system_clock::now();
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(1000).count())
+	{
+		start_ = end_;
+		count_++;
+
+		Cnt_ = Character::fallCnt_/ count_;
+
+	}
+
+
+
+	_dbgDrawFormatString(0, 550, 0xFFFFFF, "FallCnt : %d", Cnt_);
+
+	
+
 	return std::move(own);
 
 }
@@ -79,7 +98,7 @@ GameScene::GameScene()
 
 	}
 	IpNetwork.updata_;
-
+	count_ = 0;
 
 }
 

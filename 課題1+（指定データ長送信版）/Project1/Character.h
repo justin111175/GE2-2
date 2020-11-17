@@ -25,6 +25,8 @@ public:
 	void SendData();
 	void RevData();
 	void RunCheck();
+	static int fallCnt_;
+	int id_;
 
 private:
 	std::vector<int> mapDataBase_;
@@ -35,6 +37,5 @@ private:
 	int runCnt_;
 	Vector2 speed_;
 	Vector2 pos_;
-	int id_;
 };
 

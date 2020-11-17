@@ -28,12 +28,42 @@ LoginScene::LoginScene()
 {
 	IpImageMng.GetID("1", "image/1.jpg", { 800,600 }, { 1,1 });
 
-	
+	std::ifstream ifp("ini/hostIP.txt");
 
-	mean_.try_emplace(LoginMean_ID::HOST, "オンライン【ホスト】");
-	mean_.try_emplace(LoginMean_ID::GEST, "オンライン【ゲスト】");
-	mean_.try_emplace(LoginMean_ID::GEST_BEFORE, "オンライン【前回ゲスト】");
-	mean_.try_emplace(LoginMean_ID::NON, "オフライン");
+
+
+	std::string getlineString_;
+
+	auto stringInt = [](std::string string) {
+
+		return atoi(string.c_str());
+
+	};
+
+
+	if (ifp.is_open())
+	{
+		if (!ifp.eof())
+		{
+			while (std::getline(ifp, getlineString_, '.'))
+			{
+				stringIp_.emplace_back(stringInt(getlineString_));
+				if (ifp.eof())
+				{
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+
+
+	}
+		mean_.try_emplace(LoginMean_ID::HOST, "オンライン【ホスト】");
+		mean_.try_emplace(LoginMean_ID::GEST, "オンライン【ゲスト】");
+		mean_.try_emplace(LoginMean_ID::GEST_BEFORE, "オンライン【前回ゲスト】");
+		mean_.try_emplace(LoginMean_ID::NON, "オフライン");
 
 	func_.try_emplace(UpdataMode::SetNetWork, std::bind(&LoginScene::SetNetWork, this));
 	func_.try_emplace(UpdataMode::GetHostIP, std::bind(&LoginScene::GetHostIp, this));
@@ -46,6 +76,10 @@ LoginScene::LoginScene()
 	mode_ = UpdataMode::SetNetWork;
 	testFlag_ = false;
 	ipData = IpNetwork.GetIp();
+
+
+
+
 
 
 }
@@ -107,6 +141,8 @@ void LoginScene::Ctl(conType input)
 
 					break;
 				case LoginMean_ID::GEST_BEFORE:
+					B_GEST();
+
 					break;
 				case LoginMean_ID::NON:
 					IpNetwork.SetNetWorkMode(NetWorkMode::OFFLINE);
@@ -175,6 +211,25 @@ void LoginScene::GEST()
 
 }
 
+void LoginScene::B_GEST()
+{
+	IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
+
+	IPDATA hostIP;
+
+	hostIP.d1 = stringIp_[0];
+	hostIP.d2 = stringIp_[1];
+	hostIP.d3 = stringIp_[2];
+	hostIP.d4 = stringIp_[3];
+
+	if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
+	{
+		TRACE("ホスト接続\n");
+		mode_ = UpdataMode::StartInit;
+		TRACE("ホストからの開始合図を待ち\n");
+	}
+}
+
 void LoginScene::SetNetWork()
 {
 	std::ifstream ifp("ini/hostIP.txt");
@@ -212,8 +267,9 @@ void LoginScene::StartInit()
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
-			IpNetwork.NetRev();
+			//IpNetwork.NetRev();
 
+			TRACE("test");
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
@@ -226,11 +282,11 @@ void LoginScene::StartInit()
 	else
 	{
 
-		//if (IpNetwork.GetActiv() == ActiveState::Init)
-		//{
-		//	IpNetwork.NetRev();
+		if (IpNetwork.GetActiv() == ActiveState::Init)
+		{
+			//IpNetwork.NetRev();
 
-		//}
+		}
 		if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
 			if (IpNetwork.revStanby_)
@@ -258,7 +314,6 @@ void LoginScene::StartInit()
 
 void LoginScene::Play()
 {
-	//IpNetwork.Updata();
 	testFlag_ = true;
 	if (IpNetwork.GetActiv() == ActiveState::Wait)
 	{
@@ -274,7 +329,6 @@ void LoginScene::Draw()
 
 	DrawOwn();
 
-	//ScreenFlip();
 }
 
 void LoginScene::DrawOwn()

@@ -119,13 +119,20 @@ public:
 
 	int dir_;
 	Vector2 pos_;
-	std::map<int,std::list<MesPacket>> mapID_;
+	std::vector<MesPacket> VecID_;
+
+
 	std::list<MesPacket> palyerList_;
+
+
 	MesPacket posPacket_;
 	
-	MesPacket GetList(int id);
+	MesPacket GetPacket(int id);
+	void EraserPac();
+
+
 private:
-	std::map<MesType, std::function<void(void)>> revFunc_;
+	std::map<MesType, std::function<void(int, MesHeader&, MesPacket&)>> revFunc_;
 
 	void RevInit();
 
