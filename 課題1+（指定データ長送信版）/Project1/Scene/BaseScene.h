@@ -4,6 +4,7 @@
 #include "Dxlib.h"
 #include "../common/Input/Controller.h"
 #include "../common/ImageMng.h"
+#include <chrono>
 
 enum class SceneChange
 {

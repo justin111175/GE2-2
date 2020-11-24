@@ -28,7 +28,9 @@ enum class MesType:unsigned char
 	GAME_START,						// ホストからの初期化情報での初期化完了
 	TMX_SIZE,
 	TMX_DATA,
-	POS
+	POS,
+	SET_BOMB,						//ボムの設置
+	MAX
 };
 
 struct MesHeader
@@ -40,6 +42,7 @@ struct MesHeader
 	unsigned int length;			// 分割かどうかに関わらず、単一バケットのデータ長（intの数）
 
 };
+
 union UnionData
 {
 	unsigned int uiData;
@@ -53,8 +56,18 @@ union Header
 	unsigned int header[2];
 };
 
+union UnionTime
+{
+	std::chrono::system_clock::time_point start_;
+	int iData[2];
+
+};
 
 using MesPacket = std::vector<UnionData>;
+
+using RevPacket = std::pair<MesType, MesPacket>;
+
+
 class NetWork
 {
 public:
@@ -119,8 +132,9 @@ public:
 
 	int dir_;
 	Vector2 pos_;
-	std::vector<MesPacket> VecID_;
 
+	std::vector<MesPacket> VecID_;
+	std::vector<RevPacket> TypePacket_;
 
 	std::list<MesPacket> palyerList_;
 
@@ -128,6 +142,7 @@ public:
 	MesPacket posPacket_;
 	
 	MesPacket GetPacket(int id);
+	MesPacket GetPacket(MesType type);
 	void EraserPac();
 
 

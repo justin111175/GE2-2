@@ -150,6 +150,7 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
     MesPacket data;
 
     Header header;
+    UnionData uniondata_;
     header.mesheader.sendID = 0;
 
     int tmpCount = intSendCount_ / 4;
@@ -165,7 +166,12 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
         
         // 初期化TMXの最後送信
         data.clear();
-        data.insert(data.end(), { static_cast<unsigned int>(mesPacket.size()) });
+        
+        uniondata_.cData[0] = 21;
+        uniondata_.cData[1] = 17;
+        uniondata_.cData[2] = 4;
+
+        data.insert(data.end(), { /*static_cast<unsigned int>(mesPacket.size())*/uniondata_ });
         NetWorkSend(state_->GetHandle(), data.data(), data.size() * 4);
 
         TRACE("TMX_SIZE送信\n");
@@ -238,6 +244,23 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
         {
             //SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
             SetHeader(Header{ type,0,0,4 }, mesPacket);
+
+            NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
+            //TRACE("送信した\n");
+            return true;
+        }
+
+
+    }    
+    
+    if (type == MesType::SET_BOMB)
+    {
+
+        // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
+        //if (sendSize >= mesPacket.size())
+        {
+            //SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
+            SetHeader(Header{ type,0,0,6 }, mesPacket);
 
             NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
             //TRACE("送信した\n");
@@ -746,6 +769,53 @@ MesPacket NetWork::GetPacket(int id)
     return data_;
 }
 
+MesPacket NetWork::GetPacket(MesType type)
+{
+    std::lock_guard<std::mutex> lock(mtx);
+
+    MesPacket data_;
+
+
+    for (auto& data : TypePacket_)
+    {
+        if (data.first == type)
+        {
+            data_ = data.second;
+            data.second[0].iData = -1;
+        }
+
+    }
+
+    //if (VecID_.size())
+    //{
+    //    for (auto& data : VecID_)
+    //    {
+    //        if (data.data())
+    //        {
+    //            if (data[0].iData == id)
+    //            {
+    //                data_ = data;
+    //                data[0].iData = -1;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            data = MesPacket{ UnionData{0} };
+    //            data[0].iData = -1;
+    //        }
+
+    //    }
+    //}
+
+    return data_;
+
+
+
+
+
+    return MesPacket();
+}
+
 void NetWork::EraserPac()
 {
     std::lock_guard<std::mutex> lock(mtx);
@@ -757,6 +827,13 @@ void NetWork::EraserPac()
         VecID_.erase(itr, VecID_.end());
     }
 
+
+    auto test = std::remove_if(TypePacket_.begin(), TypePacket_.end(), [](RevPacket& data) {return data.second[0].iData == -1; });
+
+    if (test != TypePacket_.end())
+    {
+        TypePacket_.erase(test, TypePacket_.end());
+    }
 
 
 }
@@ -809,7 +886,8 @@ void NetWork::RevInit()
 
 
 
-        });
+    });
+
     revFunc_.try_emplace(MesType::STANDY, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         std::lock_guard<std::mutex> lock(mtx);
@@ -822,7 +900,8 @@ void NetWork::RevInit()
 
 
 
-        });
+    });
+
     revFunc_.try_emplace(MesType::GAME_START, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         end = std::chrono::system_clock::now();
@@ -832,7 +911,8 @@ void NetWork::RevInit()
 
 
 
-        });
+    });
+
     revFunc_.try_emplace(MesType::POS, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         // ヘッダーの部分確保する
@@ -843,9 +923,19 @@ void NetWork::RevInit()
 
 
 
+    });
+
+    revFunc_.try_emplace(MesType::SET_BOMB, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        //TypePacket_[0].
+        TRACE("TEST");
         });
-
-
 
 }
 
@@ -868,27 +958,23 @@ void NetWork::ThreadUpdata(void)
 
     while (ProcessMessage() == 0&&GetLostNetWork()==-1)
     {
-        if (state_->Updata())
+
+        int handle = state_->GetHandle();
+
+        MesHeader revMesHeader_;
+        MesPacket revPacket_;
+
+        if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
         {
+            // 受信
+            NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
 
-
-
-            int handle = state_->GetHandle();
-
-            MesHeader revMesHeader_;
-            MesPacket revPacket_;
-
-            if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
+            if (revMesHeader_.type < MesType::MAX)
             {
-                // 受信
-                NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
-
-                if (revMesHeader_.type <= MesType::POS)
-                {
-                    revFunc_[revMesHeader_.type](handle, revMesHeader_, revPacket_);
-                }
+                revFunc_[revMesHeader_.type](handle, revMesHeader_, revPacket_);
             }
         }
+        
     }
 
 

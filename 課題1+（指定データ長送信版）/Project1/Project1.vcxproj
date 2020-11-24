@@ -19,13 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Character.cpp" />
+    <ClCompile Include="Scene\Obj\Bomb.cpp" />
+    <ClCompile Include="Scene\Obj\Player.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="common\Input\KeyInput.cpp" />
     <ClCompile Include="common\Input\PadInput.cpp" />
     <ClCompile Include="common\_debug\_DebugConOut.cpp" />
     <ClCompile Include="common\_debug\_DebugDispOut.cpp" />
     <ClCompile Include="InterNet\OffLine.cpp" />
+    <ClCompile Include="Scene\Obj\Obj.cpp" />
     <ClCompile Include="Scene\CrossOver.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="InterNet\GestState.cpp" />
@@ -41,7 +43,8 @@
     <ClCompile Include="Scene\Transition.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Character.h" />
+    <ClInclude Include="Scene\Obj\Bomb.h" />
+    <ClInclude Include="Scene\Obj\Player.h" />
     <ClInclude Include="common\ImageMng.h" />
     <ClInclude Include="common\Input\Controller.h" />
     <ClInclude Include="common\Input\conTypeID.h" />
@@ -52,6 +55,7 @@
     <ClInclude Include="common\_debug\_DebugConOut.h" />
     <ClInclude Include="common\_debug\_DebugDispOut.h" />
     <ClInclude Include="InterNet\OffLine.h" />
+    <ClInclude Include="Scene\Obj\Obj.h" />
     <ClInclude Include="Scene\CrossOver.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="Scene\LoginScene.h" />

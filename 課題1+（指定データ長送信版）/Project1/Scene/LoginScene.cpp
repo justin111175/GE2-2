@@ -252,7 +252,7 @@ void LoginScene::GetHostIp()
 
 void LoginScene::StartInit()
 {
-	//IpNetwork.Updata();
+	IpNetwork.Updata();
 
 	if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
@@ -267,9 +267,9 @@ void LoginScene::StartInit()
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
-			//IpNetwork.NetRev();
+			IpNetwork.Updata();
 
-			TRACE("test");
+			//TRACE("test");
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
