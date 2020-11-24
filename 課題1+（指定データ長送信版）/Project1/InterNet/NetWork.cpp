@@ -816,6 +816,8 @@ MesPacket NetWork::GetPacket(MesType type)
     return MesPacket();
 }
 
+
+
 void NetWork::EraserPac()
 {
     std::lock_guard<std::mutex> lock(mtx);

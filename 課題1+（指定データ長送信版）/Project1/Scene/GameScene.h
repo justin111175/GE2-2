@@ -18,6 +18,7 @@ public:
 	GameScene();
 	~GameScene();
 	void SetBomb(int ownID,int selfID,Vector2 pos, std::chrono::system_clock::time_point time,bool sendFlag);
+	void SetFire(Vector2);
 	void DeathEraser();
 
 	int GetBombSize(int ownID_);
@@ -36,6 +37,7 @@ private:
 
 	std::vector<int> mapDataBase_;
 	std::vector<int*> mapData_;
+
 	std::chrono::system_clock::time_point start_, end_;
 	std::vector<int> fallCnt;
 	int Cnt_;

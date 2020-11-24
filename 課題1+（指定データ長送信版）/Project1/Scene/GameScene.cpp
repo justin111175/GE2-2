@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "../common/_debug/_DebugDispOut.h"
 #include "Obj/Player.h"
+#include "Obj/Fire.h"
 
 void GameScene::Draw()
 {	
@@ -64,7 +65,15 @@ void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, std::chrono::system_
 
 	bomb_ = { pos ,ownID,selfID ,true ,time_.start_ };
 	
-	objList_.emplace_back(std::make_unique<Bomb>(bomb_));
+	objList_.emplace_back(std::make_unique<Bomb>(bomb_,*this));
+
+
+}
+
+void GameScene::SetFire(Vector2 pos)
+{
+
+	objList_.emplace_back(std::make_unique<Fire>(pos));
 
 
 }

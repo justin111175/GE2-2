@@ -29,6 +29,13 @@ struct Tileset {
 
 };
 
+
+
+//mapDataBase,mapData
+using PairMap = std::pair<std::vector<int>, std::vector<int*>>;
+
+using VecMap = std::vector<PairMap>;
+
 class TmxObj
 {
 public:
@@ -40,13 +47,18 @@ public:
 	void Draw();
     Tileset tileset;
 
+
+
 	void SendTmx();
 	std::map<std::string, std::vector<int>> layer_;
+
+	VecMap GetMap();
 
 private:
 
 	std::map<std::string,std::string> layerData_;
 	std::map<std::string, std::string> mapData_;
+	VecMap pairMap_;
 
 
 	std::vector<int> StringChange(std::string string);

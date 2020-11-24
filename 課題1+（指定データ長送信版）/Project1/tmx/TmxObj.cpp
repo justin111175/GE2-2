@@ -225,6 +225,48 @@ void TmxObj::SendTmx()//host
 
 }
 
+VecMap TmxObj::GetMap()
+{
+
+	pairMap_.resize(layer_.size());
+	for (int i = 0; i < layer_.size(); i++)
+	{
+		pairMap_[i].first.resize((__int64)21 * 17);
+		for (size_t no = 0; no < 17; no++)
+		{
+			pairMap_[i].second.emplace_back(&pairMap_[i].first[no * 21]);
+		}
+
+
+	}
+
+
+
+	for (int i = 0; i < layer_["1"].size(); i++)
+	{
+		pairMap_[0].first[i] = layer_["1"][i];
+
+	}
+	for (int i = 0; i < layer_["2"].size(); i++)
+	{
+		pairMap_[1].first[i] = layer_["2"][i];
+
+	}
+	for (int i = 0; i < layer_["3"].size(); i++)
+	{
+		pairMap_[2].first[i] =layer_["3"][i];
+
+	}
+	for (int i = 0; i <layer_["4"].size(); i++)
+	{
+		pairMap_[3].first[i] = layer_["4"][i];
+
+	}
+
+	return pairMap_;
+	
+}
+
 std::vector<int> TmxObj::StringChange(std::string string)
 {
 

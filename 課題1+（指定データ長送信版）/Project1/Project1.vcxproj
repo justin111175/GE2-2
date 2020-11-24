@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\Obj\Fire.cpp" />
     <ClCompile Include="Scene\Obj\Bomb.cpp" />
     <ClCompile Include="Scene\Obj\Player.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="Scene\Transition.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\Obj\Fire.h" />
     <ClInclude Include="Scene\Obj\Bomb.h" />
     <ClInclude Include="Scene\Obj\Player.h" />
     <ClInclude Include="common\ImageMng.h" />

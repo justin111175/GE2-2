@@ -27,9 +27,10 @@ enum class MesType:unsigned char
 	STANDY,							// 初期化情報送信完了（ホスト用）
 	GAME_START,						// ホストからの初期化情報での初期化完了
 	TMX_SIZE,
-	TMX_DATA,
-	POS,
-	SET_BOMB,						//ボムの設置
+	TMX_DATA,						// 
+	POS,							// ゲーム中データ
+	SET_BOMB,						// ボムの設置
+	DEATH,							// 死亡-キャラクターID
 	MAX
 };
 
@@ -68,6 +69,7 @@ using MesPacket = std::vector<UnionData>;
 using RevPacket = std::pair<MesType, MesPacket>;
 
 
+
 class NetWork
 {
 public:
@@ -77,16 +79,13 @@ public:
 		static NetWork s_Instance;
 		return s_Instance;
 	}
-	
 	bool Updata(void);
 
 	bool CloseNetWork();
 
 	void SetHeader(Header header, MesPacket& mesP_);
 
-
 	bool RevTmx(std::string);
-
 
 	bool SendMes(MesType type);
 	bool SendMes(MesType type, MesPacket& mesPacket);
@@ -94,8 +93,6 @@ public:
 	void GetSetting(const char* setting);
 
 	void Send(std::string file);
-
-
 
 	void SendStanby(void);
 	void SendStart();
@@ -128,24 +125,19 @@ public:
 	std::chrono::system_clock::time_point  start, end;
 	
 	unsigned int intSendCount_;
-
-
 	int dir_;
 	Vector2 pos_;
-
 	std::vector<MesPacket> VecID_;
 	std::vector<RevPacket> TypePacket_;
 
 	std::list<MesPacket> palyerList_;
-
-
 	MesPacket posPacket_;
 	
 	MesPacket GetPacket(int id);
 	MesPacket GetPacket(MesType type);
+	VecMap GetMap();
+
 	void EraserPac();
-
-
 private:
 	std::map<MesType, std::function<void(int, MesHeader&, MesPacket&)>> revFunc_;
 
@@ -168,6 +160,8 @@ private:
 	MesHeader mesData_;
 
 	int retest = 0;
+
+
 
 	NetWork();
 	~NetWork();
