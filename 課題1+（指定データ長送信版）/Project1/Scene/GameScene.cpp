@@ -81,7 +81,7 @@ void GameScene::SetFire(Vector2 pos)
 void GameScene::DeathEraser()
 {
 
-	auto itr = std::remove_if(objList_.begin(), objList_.end(), [](unique_Obj& obj) {return obj->GetAlive() == false; });
+	auto itr = std::remove_if(objList_.begin(), objList_.end(), [](unique_Obj& obj) {return obj->GetIsDeath() == true; });
 
 	if (itr != objList_.end())
 	{
@@ -165,26 +165,27 @@ GameScene::GameScene()
 
 	}
 
-	std::vector<Vector2> plPos;
-	mapDataBase_.resize((__int64)21 * 17);
-	for (size_t no = 0; no < 17; no++)
-	{
-		mapData_.emplace_back(&mapDataBase_[no * 21]);
-	}
-	for (int i = 0; i < IpNetwork.tmx_->layer_["3"].size(); i++)
-	{
-		mapDataBase_[i] = IpNetwork.tmx_->layer_["3"][i];
+	//std::vector<Vector2> plPos;
+	//mapDataBase_.resize((__int64)21 * 17);
+	//for (size_t no = 0; no < 17; no++)
+	//{
+	//	mapData_.emplace_back(&mapDataBase_[no * 21]);
+	//}
+	//for (int i = 0; i < IpNetwork.tmx_->layer_["3"].size(); i++)
+	//{
+	//	mapDataBase_[i] = IpNetwork.tmx_->layer_["3"][i];
 
-	}
+	//}
 
 	int cntID_ = 0;
-	for (int i = 0; i < IpNetwork.tmx_->layer_["4"].size(); i++)
+	for (int i = 0; i < IpNetwork.tmx_->pairMap_["4"].first.size(); i++)
 	{
-		if (IpNetwork.tmx_->layer_["4"][i] == 4)
+	
+		if (IpNetwork.tmx_->pairMap_["4"].first[i] == 4)
 		{
-			objList_.emplace_back(std::make_unique<Player>(mapDataBase_, mapData_, Vector2{ i % 21,i / 21 }, cntID_, *this));
+			objList_.emplace_back(std::make_unique<Player>( Vector2{ i % 21,i / 21 }, cntID_, *this));
 			cntID_+= UNIT_ID_BASE;
-			IpNetwork.tmx_->layer_["4"][i] = 0;
+			IpNetwork.tmx_->pairMap_["4"].first[i] = 0;
 
 		}
 

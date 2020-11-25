@@ -23,7 +23,7 @@ class Player :
 {
 public:
 
-	Player(std::vector<int> mapDataBase, std::vector<int*> mapData, Vector2 pos, int id,BaseScene& scene);
+	Player(Vector2 pos, int id,BaseScene& scene);
 	~Player();
 	void Update(void) override;
 

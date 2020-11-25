@@ -55,12 +55,25 @@ void TmxObj::LoadTmx(const char* tmx)
 	}
 
 
+
 	for (auto i : layerData_)
 	{
 
-		layer_.try_emplace(i.first, StringChange(layerData_[i.first]));
+		pairMap_.try_emplace(i.first);
 
+		pairMap_[i.first].first.resize((__int64)21 * 17);
+
+		//for (int p = 0; p < layerData_[i.first].size(); p++)
+		
+		pairMap_[i.first].first = StringChange(layerData_[i.first]);
+		for (size_t no = 0; no < 17; no++)
+		{
+			pairMap_[i.first].second.emplace_back(&pairMap_[i.first].first[no * 21]);
+		}
+		
 	}
+
+
 	TRACE("ƒ}ƒbƒv‰Šú‰»Š®—¹\n");
 
 }
@@ -100,18 +113,35 @@ void TmxObj::LoadTsx(const char* tsx)
 
 void TmxObj::Draw()
 {
-	for (auto test : layerData_)
-	{
-		for (int i = 0; i < tileset.width * tileset.height; i++)
-		{
-			
-			if (layer_[test.first][i] - 1 != -1)
-			{
-				DrawGraph(tileset.tileWidth * (i % tileset.width), tileset.tileHeight * (i / tileset.width), IMAGE_ID("map")[layer_[test.first][i]-1], true);
+	//for (auto test : layerData_)
+	//{
+	//	for (int i = 0; i < tileset.width * tileset.height; i++)
+	//	{
+	//		
+	//		if (layer_[test.first][i] - 1 != -1)
+	//		{
+	//			DrawGraph(tileset.tileWidth * (i % tileset.width), tileset.tileHeight * (i / tileset.width), IMAGE_ID("map")[layer_[test.first][i]-1], true);
 
+	//		}
+	//		
+	//	}
+	//}
+
+
+
+	for (auto data : pairMap_)
+	{
+		for (int y = 0; y < 17; y++)
+		{
+			for (int x = 0; x < 21; x++)
+			{
+				if (pairMap_[data.first].second[y][x] - 1 != -1)
+				{
+					DrawGraph(tileset.tileWidth * x, tileset.tileHeight * y, IMAGE_ID("map")[pairMap_[data.first].second[y][x]-1], true);
+				}
 			}
-			
 		}
+
 	}
 }
 
@@ -225,47 +255,47 @@ void TmxObj::SendTmx()//host
 
 }
 
-VecMap TmxObj::GetMap()
-{
-
-	pairMap_.resize(layer_.size());
-	for (int i = 0; i < layer_.size(); i++)
-	{
-		pairMap_[i].first.resize((__int64)21 * 17);
-		for (size_t no = 0; no < 17; no++)
-		{
-			pairMap_[i].second.emplace_back(&pairMap_[i].first[no * 21]);
-		}
-
-
-	}
-
-
-
-	for (int i = 0; i < layer_["1"].size(); i++)
-	{
-		pairMap_[0].first[i] = layer_["1"][i];
-
-	}
-	for (int i = 0; i < layer_["2"].size(); i++)
-	{
-		pairMap_[1].first[i] = layer_["2"][i];
-
-	}
-	for (int i = 0; i < layer_["3"].size(); i++)
-	{
-		pairMap_[2].first[i] =layer_["3"][i];
-
-	}
-	for (int i = 0; i <layer_["4"].size(); i++)
-	{
-		pairMap_[3].first[i] = layer_["4"][i];
-
-	}
-
-	return pairMap_;
-	
-}
+//VecMap TmxObj::GetMap()
+//{
+//
+//	pairMap_.resize(layer_.size());
+//	for (int i = 0; i < layer_.size(); i++)
+//	{
+//		pairMap_[i].first.resize((__int64)21 * 17);
+//		for (size_t no = 0; no < 17; no++)
+//		{
+//			pairMap_[i].second.emplace_back(&pairMap_[i].first[no * 21]);
+//		}
+//
+//
+//	}
+//
+//
+//
+//	for (int i = 0; i < layer_["1"].size(); i++)
+//	{
+//		pairMap_[0].first[i] = layer_["1"][i];
+//
+//	}
+//	for (int i = 0; i < layer_["2"].size(); i++)
+//	{
+//		pairMap_[1].first[i] = layer_["2"][i];
+//
+//	}
+//	for (int i = 0; i < layer_["3"].size(); i++)
+//	{
+//		pairMap_[2].first[i] =layer_["3"][i];
+//
+//	}
+//	for (int i = 0; i <layer_["4"].size(); i++)
+//	{
+//		pairMap_[3].first[i] = layer_["4"][i];
+//
+//	}
+//
+//	return pairMap_;
+//	
+//}
 
 std::vector<int> TmxObj::StringChange(std::string string)
 {

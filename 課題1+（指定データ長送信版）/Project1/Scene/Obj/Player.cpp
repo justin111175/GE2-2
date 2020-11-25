@@ -8,7 +8,7 @@
 #include "../../common/_debug/_DebugConOut.h"
 int Player::fallCnt_ = 0;
 
-Player::Player(std::vector<int> mapDataBase, std::vector<int*> mapData, Vector2 pos, int id, BaseScene& scene)
+Player::Player(Vector2 pos, int id, BaseScene& scene)
 	:scene_(scene)
 {
 
@@ -18,8 +18,7 @@ Player::Player(std::vector<int> mapDataBase, std::vector<int*> mapData, Vector2 
 	dir_ = DIR::Right;
 	runCnt_ = 0;
 	speed_ = { 4 ,0 };
-	mapDataBase_ = mapDataBase;
-	mapData_ = mapData;
+
 
 	id_ = id;
 
@@ -42,6 +41,9 @@ Player::~Player()
 
 void Player::Update(void)
 {
+
+	mapDataBase_ = IpNetwork.tmx_->pairMap_["3"].first;
+	mapData_ = IpNetwork.tmx_->pairMap_["3"].second;
 
 	if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
@@ -162,7 +164,7 @@ void Player::Draw(void)
 
 	if (id_==0)
 	{
-		_dbgDrawBox(pos_.x, pos_.y, pos_.x + 32 , pos_.y + 32 , 0xFFFFF, true);
+		_dbgDrawBox(pos_.x, pos_.y, pos_.x + 32 , pos_.y + 32 , 0xFFFFF, false);
 	}
 	_dbgDrawFormatString(pos_.x, pos_.y, 0xFFFFFF, "%d", id_);
 
@@ -393,7 +395,7 @@ void Player::InputInit()
 		});
 	CheckList_.try_emplace(InputID::Left, [&]() {
 
-		if (mapData_[(pos_.y) / 32][(pos_.x) / 32 ] != 0)
+		if (mapData_[(pos_.y) / 32][(pos_.x-4) / 32 ] != 0)
 		{
 			if (pos_.y > (pos_.y) / 32 * 32 + 16)
 			{
@@ -403,7 +405,7 @@ void Player::InputInit()
 			return false;
 		}
 
-		if (mapData_[(pos_.y + 31) / 32][(pos_.x) / 32 ] != 0)
+		if (mapData_[(pos_.y + 31) / 32][(pos_.x-4) / 32 ] != 0)
 		{
 			if (pos_.y < (pos_.y + 30) / 32 * 32)
 			{

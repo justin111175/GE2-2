@@ -26,6 +26,7 @@ public:
 	virtual bool isPacket()=0;
 
 	bool GetAlive();
+	bool GetIsDeath();
 	int GetID();
 private:
 

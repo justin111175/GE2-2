@@ -14,6 +14,11 @@ struct BombStruct
 
 };
 
+enum class AnimeState
+{
+	¶‚«‚Ä‚¢‚é,
+	€‚ñ‚¾
+};
 
 class Bomb :
 	public Obj
@@ -33,5 +38,8 @@ private:
 	std::chrono::system_clock::time_point start_, end_;
 	BaseScene& scene_;
 
+	std::map<AnimeState,std::vector<int>> animeBomb_;
+
+	int count_;
 };
 

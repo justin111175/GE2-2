@@ -6,6 +6,8 @@
 #define PI 3.1415926f
 #define DEG (PI/180.0)
 
+using PairFire = std::pair<bool, int>;
+
 class Fire :
 	public Obj
 {
@@ -19,9 +21,10 @@ public:
 	bool isPacket()override;
 
 private:
+	
 	std::chrono::system_clock::time_point start_, end_;
 	int count_;
-
+	std::vector<PairFire> vecPairFire_;
 
 	std::vector<int> vecfire_;
 	int fireWidth_;
