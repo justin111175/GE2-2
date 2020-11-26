@@ -15,12 +15,9 @@ void GameScene::DrawOwn()
 {
 
 
-
-
-	//DrawGraph(0, 0, IpImageMng.GetID("2")[0], true);
-
 	IpNetwork.tmx_->Draw();
 
+	objList_.sort([](unique_Obj& playA, unique_Obj& playB) {return playA->GetZorder() > playB->GetZorder(); });
 
 
 	for (auto &&data : objList_)
@@ -28,9 +25,12 @@ void GameScene::DrawOwn()
 		data->Draw();
 	}
 
+
+
+
 }
 
-void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, std::chrono::system_clock::time_point time, bool sendFlag)
+void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, int lengh, std::chrono::system_clock::time_point time, bool sendFlag)
 {
 	MesPacket data;
 	UnionData unionD;
@@ -50,6 +50,9 @@ void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, std::chrono::system_
 	unionD.iData = pos.y;
 	data.insert(data.end(), unionD);
 
+	unionD.iData = lengh;
+	data.insert(data.end(), unionD);
+
 	unionD.iData = time_.iData[0];
 	data.insert(data.end(), unionD);
 
@@ -63,17 +66,17 @@ void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, std::chrono::system_
 	}
 
 
-	bomb_ = { pos ,ownID,selfID ,true ,time_.start_ };
+	bomb_ = { pos ,ownID,selfID ,true ,lengh,time_.start_ };
 	
 	objList_.emplace_back(std::make_unique<Bomb>(bomb_,*this));
 
 
 }
 
-void GameScene::SetFire(Vector2 pos)
+void GameScene::SetFire(Vector2 pos,int lengh)
 {
 
-	objList_.emplace_back(std::make_unique<Fire>(pos));
+	objList_.emplace_back(std::make_unique<Fire>(pos, lengh,*this));
 
 
 }
@@ -105,15 +108,23 @@ void GameScene::RevBomb()
 
 	if (data_.size())
 	{
-		time.iData[0] = data_[4].iData;
-		time.iData[1] = data_[5].iData;
+		time.iData[0] = data_[5].iData;
+		time.iData[1] = data_[6].iData;
 
-		SetBomb(data_[0].iData, data_[1].iData, { data_[2].iData,data_[3].iData }, time.start_,false);
+		SetBomb(data_[0].iData, data_[1].iData, { data_[2].iData,data_[3].iData }, data_[4].iData, time.start_,false);
 	}
 
 
 	
 
+}
+
+Vector2 GameScene::GetObjPos()
+{
+	
+	auto itr = std::remove_if(objList_.begin(), objList_.end(), [](unique_Obj& obj) {return obj->GetObjID() == ObjID::PLAYER; });
+
+	return (*itr)->GetPos();
 }
 
 unique_Base GameScene::Update(unique_Base own)
@@ -165,17 +176,7 @@ GameScene::GameScene()
 
 	}
 
-	//std::vector<Vector2> plPos;
-	//mapDataBase_.resize((__int64)21 * 17);
-	//for (size_t no = 0; no < 17; no++)
-	//{
-	//	mapData_.emplace_back(&mapDataBase_[no * 21]);
-	//}
-	//for (int i = 0; i < IpNetwork.tmx_->layer_["3"].size(); i++)
-	//{
-	//	mapDataBase_[i] = IpNetwork.tmx_->layer_["3"][i];
 
-	//}
 
 	int cntID_ = 0;
 	for (int i = 0; i < IpNetwork.tmx_->pairMap_["4"].first.size(); i++)

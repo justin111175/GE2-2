@@ -17,14 +17,15 @@ public:
 
 	GameScene();
 	~GameScene();
-	void SetBomb(int ownID,int selfID,Vector2 pos, std::chrono::system_clock::time_point time,bool sendFlag);
-	void SetFire(Vector2);
+	void SetBomb(int ownID,int selfID,Vector2 pos,int lengh, std::chrono::system_clock::time_point time,bool sendFlag);
+	void SetFire(Vector2,int);
 	void DeathEraser();
 
 	int GetBombSize(int ownID_);
 
 	void RevBomb();
 
+	Vector2 GetObjPos();
 private:
 	void Draw();
 	void DrawOwn() override;

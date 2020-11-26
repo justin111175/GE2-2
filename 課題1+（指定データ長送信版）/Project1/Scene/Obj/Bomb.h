@@ -10,6 +10,7 @@ struct BombStruct
 	int ownID_;
 	int selfID_;
 	bool initFlag_;
+	int lengh_;
 	std::chrono::system_clock::time_point start_;
 
 };
@@ -31,10 +32,12 @@ public:
 
 	void Draw(void)override;
 	bool isPacket()override;
+	ObjID GetObjID()override;
 
 
 private:
 	int selfID_;
+	int lengh_;
 	std::chrono::system_clock::time_point start_, end_;
 	BaseScene& scene_;
 

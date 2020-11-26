@@ -4,6 +4,7 @@
 #include "../common/ImageMng.h"
 #include "../InterNet/NetWork.h"
 #include "../common/_debug/_DebugConOut.h"
+#include "../common/_debug/_DebugDispOut.h"
 #include <vector>
 #include <bitset>
 
@@ -63,16 +64,28 @@ void TmxObj::LoadTmx(const char* tmx)
 
 		pairMap_[i.first].first.resize((__int64)21 * 17);
 
-		//for (int p = 0; p < layerData_[i.first].size(); p++)
 		
 		pairMap_[i.first].first = StringChange(layerData_[i.first]);
+
+
+
+
 		for (size_t no = 0; no < 17; no++)
 		{
+
 			pairMap_[i.first].second.emplace_back(&pairMap_[i.first].first[no * 21]);
 		}
 		
 	}
 
+	for (int y = 0; y < 17; y++)
+	{
+		for (int x = 0; x < 21; x++)
+		{
+			checkMap_[y][x] = -1;
+		}
+
+	}
 
 	TRACE("ƒ}ƒbƒv‰Šú‰»Š®—¹\n");
 
@@ -138,6 +151,11 @@ void TmxObj::Draw()
 				if (pairMap_[data.first].second[y][x] - 1 != -1)
 				{
 					DrawGraph(tileset.tileWidth * x, tileset.tileHeight * y, IMAGE_ID("map")[pairMap_[data.first].second[y][x]-1], true);
+				}
+
+				//if (checkMap_[y][x] == false)
+				{
+					//_dbgDrawFormatString(tileset.tileWidth * x, tileset.tileHeight * y, 0xFFFFFF, "%d", checkMap_[y][x]);
 				}
 			}
 		}

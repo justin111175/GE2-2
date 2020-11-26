@@ -19,7 +19,6 @@ Player::Player(Vector2 pos, int id, BaseScene& scene)
 	runCnt_ = 0;
 	speed_ = { 4 ,0 };
 
-
 	id_ = id;
 
 	controller.try_emplace(conType::Key, std::make_unique<KeyInput>());
@@ -31,6 +30,48 @@ Player::Player(Vector2 pos, int id, BaseScene& scene)
 	isDeath = false;
 	
 	InputInit();
+
+
+	animePlayer_.try_emplace(DIR::Up);
+
+	animePlayer_[DIR::Up].emplace_back(8);
+	animePlayer_[DIR::Up].emplace_back(13);
+	animePlayer_[DIR::Up].emplace_back(8);
+	animePlayer_[DIR::Up].emplace_back(18);
+
+
+
+
+	animePlayer_.try_emplace(DIR::Right);
+	animePlayer_[DIR::Right].emplace_back(7);
+	animePlayer_[DIR::Right].emplace_back(12);
+	animePlayer_[DIR::Right].emplace_back(7);
+	animePlayer_[DIR::Right].emplace_back(17);
+
+	animePlayer_.try_emplace(DIR::Down);
+
+	animePlayer_[DIR::Down].emplace_back(5);
+	animePlayer_[DIR::Down].emplace_back(10);
+	animePlayer_[DIR::Down].emplace_back(5);
+	animePlayer_[DIR::Down].emplace_back(15);
+
+	animePlayer_.try_emplace(DIR::Left);
+	animePlayer_[DIR::Left].emplace_back(6);
+	animePlayer_[DIR::Left].emplace_back(11);
+	animePlayer_[DIR::Left].emplace_back(6);
+	animePlayer_[DIR::Left].emplace_back(16);
+
+	animePlayer_.try_emplace(DIR::Death);
+
+	animePlayer_[DIR::Death].emplace_back(4);
+	animePlayer_[DIR::Death].emplace_back(9);
+	animePlayer_[DIR::Death].emplace_back(14);
+	animePlayer_[DIR::Death].emplace_back(19);
+	animePlayer_[DIR::Death].emplace_back(-1);
+
+	zorder_ = 0;
+	objID_ = ObjID::PLAYER;
+
 }
 
 Player::~Player()
@@ -42,13 +83,89 @@ Player::~Player()
 void Player::Update(void)
 {
 
+
 	mapDataBase_ = IpNetwork.tmx_->pairMap_["3"].first;
 	mapData_ = IpNetwork.tmx_->pairMap_["3"].second;
+	Vector2 tmpPos = pos_ / 32;
+	
+	MesPacket data_ = IpNetwork.GetPacket(MesType::DEATH);
 
-	if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+
+
+	if (isAlive)
 	{
-		if (id_ != 5)
+
+		if (data_.size())
 		{
+			if (id_ == data_[0].iData)
+			{
+				runCnt_ = 0;
+				isAlive = false;
+			}
+		}
+
+
+		if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+		{
+
+			if (id_ != 5)
+			{
+
+				if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+				{
+					SendDeath();
+					runCnt_ = 0;
+
+					isAlive = false;
+				}
+
+				if (id_ == 0)
+				{
+					if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+					{
+						runCnt_ = 0;
+						isAlive = false;
+					}
+					UpdateDef(conType::Key);
+
+				}
+				else
+				{
+					UpdateAuto();
+				}
+			}
+		}
+		else if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
+		{
+			if (id_ != 0)
+			{
+
+				if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+				{
+					SendDeath();
+					runCnt_ = 0;
+
+					isAlive = false;
+				}
+				if (id_ == 5)
+				{
+
+					UpdateDef(conType::Key);
+				}
+				else
+				{
+					UpdateAuto();
+				}
+			}
+		}
+		else if(IpNetwork.GetNetWorkMode() == NetWorkMode::OFFLINE)
+		{
+			if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+			{
+				SendDeath();
+				runCnt_ = 0;
+				isAlive = false;
+			}
 			if (id_ == 0)
 			{
 				UpdateDef(conType::Key);
@@ -60,32 +177,27 @@ void Player::Update(void)
 			}
 		}
 	}
-	else if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
+	else
 	{
-		if (id_ != 0)
-		{
-			if (id_ == 5)
-			{
-				UpdateDef(conType::Key);
-			}
-			else
-			{
-				UpdateAuto();
-			}
-		}
-	}
-	else if(IpNetwork.GetNetWorkMode() == NetWorkMode::OFFLINE)
-	{
-		if (id_ == 0)
-		{
-			UpdateDef(conType::Key);
 
-		}
-		else
+
+
+		end_ = std::chrono::system_clock::now();
+
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(1000/2).count())
 		{
-			//UpdateAuto();
+
+			start_ = std::chrono::system_clock::now();
+			runCnt_++;
+			if (runCnt_ >= 4)
+			{
+				isDeath = true;
+			}
 		}
+
+
 	}
+
 
 }
 
@@ -101,15 +213,17 @@ void Player::UpdateDef(conType input)
 	{
 		if ((*Inputdata)(keyData, true))
 		{
+			runCnt_++;
+
 			InputList_.splice(InputList_.begin(), InputList_, Inputdata);
 			InputList_.sort([&](auto testA, auto testB) {return testA(keyData, false) < testB(keyData, false);});
 			break;
 		}
 
 	}
+	
 
-
-	SendData();
+	SendPos();
 
 
 
@@ -121,7 +235,7 @@ void Player::UpdateAuto(void)
 	{
 		if (id_ % 2 == 0)
 		{
-			SendData();
+			SendPos();
 
 			RunCheck();
 		}
@@ -135,7 +249,7 @@ void Player::UpdateAuto(void)
 	{
 		if (id_ % 2 == 1)
 		{
-			SendData();
+			SendPos();
 
 			RunCheck();
 		}
@@ -161,18 +275,26 @@ void Player::UpdateNet(void)
 void Player::Draw(void)
 {
 
-
 	if (id_==0)
 	{
 		_dbgDrawBox(pos_.x, pos_.y, pos_.x + 32 , pos_.y + 32 , 0xFFFFF, false);
 	}
 	_dbgDrawFormatString(pos_.x, pos_.y, 0xFFFFFF, "%d", id_);
 
-	DrawGraph(pos_.x , pos_.y - 30 , IpImageMng.GetID("Play")[(static_cast<int>(dir_) + 5 * (2 + IpSceneMng.frames() / 10 % 2))], true);
+	if (isAlive)
+	{
+		DrawGraph(pos_.x , pos_.y - 30 , IpImageMng.GetID("Play")[animePlayer_[dir_][runCnt_/10%4]], true);
+
+	}
+	else
+	{
+		DrawGraph(pos_.x, pos_.y-30 , IpImageMng.GetID("Play")[animePlayer_[DIR::Death][runCnt_ % 4]], true);
+
+	}
 
 }
 
-void Player::SendData()
+void Player::SendPos()
 {
 	MesPacket data;
 	UnionData unionD;
@@ -190,6 +312,22 @@ void Player::SendData()
 	data.insert(data.end(), unionD);
 
 	IpNetwork.SendMes(MesType::POS, data);
+
+}
+
+void Player::SendDeath()
+{
+
+	MesPacket data;
+	UnionData unionD;
+
+	unionD.iData = id_;
+	data.insert(data.end(), unionD);
+
+
+
+	IpNetwork.SendMes(MesType::DEATH, data);
+
 
 }
 
@@ -232,66 +370,75 @@ void Player::RevData()
 
 void Player::RunCheck()
 {
+	runCnt_++;
 
 	Vector2 tmpPos_;
 	switch (dir_)
 	{
 	case DIR::Up:
-		if (mapData_[(pos_.y) / 32][(pos_.x) / 32] != 0)
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == -1)
 		{
-			tmpPos_.y = pos_.y / 32 + 1;
-			pos_.y = tmpPos_.y * 32;
-			dir_ = DIR::Right;
-		}
-		else
-		{
-			runCnt_ = 3;
-			speed_ = { 0,-SPEED };
-			pos_ += speed_;
+			if (mapData_[(pos_.y) / 32][(pos_.x) / 32] != 0)
+			{
+				tmpPos_.y = pos_.y / 32 + 1;
+				pos_.y = tmpPos_.y * 32;
+				dir_ = DIR::Right;
+			}
+			else
+			{
+				speed_ = { 0,-SPEED };
+				pos_ += speed_;
+			}
 		}
 		break;
 	case DIR::Right:
-		if (mapData_[(pos_.y) / 32][(pos_.x) / 32 + 1] != 0)
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32 + 1] == -1)
 		{
-			tmpPos_.x = (pos_.x) / 32;
-			pos_.x = tmpPos_.x * 32;
-			dir_ = DIR::Down;
-		}
-		else
-		{
-			runCnt_ = 2;
-			speed_ = { SPEED,0 };
-			pos_ += speed_;
+			if (mapData_[(pos_.y) / 32][(pos_.x) / 32 + 1] != 0)
+			{
+				tmpPos_.x = (pos_.x) / 32;
+				pos_.x = tmpPos_.x * 32;
+				dir_ = DIR::Down;
+			}
+			else
+			{
+				speed_ = { SPEED,0 };
+				pos_ += speed_;
+			}
 		}
 		break;
 	case DIR::Down:
-		if (mapData_[(pos_.y) / 32 + 1][(pos_.x) / 32] != 0)
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32 + 1][(pos_.x) / 32] == -1)
 		{
-			tmpPos_.y = pos_.y / 32;
-			pos_.y = tmpPos_.y * 32;
-			dir_ = DIR::Left;
-		}
-		else
-		{
-			runCnt_ = 0;
-			speed_ = { 0,SPEED };
-			pos_ += speed_;
+			if (mapData_[(pos_.y) / 32 + 1][(pos_.x) / 32] != 0)
+			{
+				tmpPos_.y = pos_.y / 32;
+				pos_.y = tmpPos_.y * 32;
+				dir_ = DIR::Left;
+			}
+			else
+			{
+				speed_ = { 0,SPEED };
+				pos_ += speed_;
+			}
 		}
 		break;
 	case DIR::Left:
-		if (mapData_[(pos_.y) / 32][(pos_.x) / 32] != 0)
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == -1)
 		{
-			tmpPos_.x = pos_.x / 32 + 1;
-			pos_.x = tmpPos_.x * 32;
-			dir_ = DIR::Up;
+			if (mapData_[(pos_.y) / 32][(pos_.x) / 32] != 0)
+			{
+				tmpPos_.x = pos_.x / 32 + 1;
+				pos_.x = tmpPos_.x * 32;
+				dir_ = DIR::Up;
 
-		}
-		else
-		{
-			runCnt_ = 1;
-			speed_ = { -SPEED,0 };
-			pos_ += speed_;
+			}
+			else
+			{
+				speed_ = { -SPEED,0 };
+				pos_ += speed_;
 
+			}
 		}
 		break;
 
@@ -306,6 +453,11 @@ int Player::GetFallCnt()
 {
 	return fallCnt_;
 
+}
+
+ObjID Player::GetObjID()
+{
+	return objID_;
 }
 
 void Player::InputInit()
@@ -333,10 +485,7 @@ void Player::InputInit()
 
 				return false;
 			}
-			//if(pos_.x < tmpPos_.x * 32-32 )
-			//{
-			//	pos_.x = tmpPos_.x * 32;
-			//}
+
 			return true;
 		
 		});
@@ -415,15 +564,6 @@ void Player::InputInit()
 			return false;
 		}
 
-
-		//if (mapData_[(pos_.y) / 32+1][(pos_.x) / 32] != 0)
-		//{
-		//	tmpPos_.x = pos_.x / 32 ;
-		//	pos_.x = tmpPos_.x * 32;
-		//	pos_ = { (tmpPos_.x = pos_.x / 32) * 32,pos_.y };
-		//}
-
-
 		return true;
 
 
@@ -436,16 +576,20 @@ void Player::InputInit()
 
 		if (data[InputID::Down][static_cast<int>(Trg::Now)])
 		{
-			if (CheckList_[InputID::Down]())
+			if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32 + 1][(pos_.x) / 32] == -1)
 			{
-				if (flag)
+				if (CheckList_[InputID::Down]())
 				{
-					pos_.y += SPEED;
-					dir_ = DIR::Down;
+					if (flag)
+					{
+						pos_.y += SPEED;
+						dir_ = DIR::Down;
 
+					}
+					return true;
 				}
-				return true;
 			}
+
 
 		}
 		return false;
@@ -457,38 +601,48 @@ void Player::InputInit()
 
 		if (data[InputID::Up][static_cast<int>(Trg::Now)])
 		{
-			if (CheckList_[InputID::Up]())
+			if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == -1)
 			{
-				if (flag)
+			
+				if (CheckList_[InputID::Up]())
 				{
-					pos_.y -= SPEED;
-					dir_ = DIR::Up;
+					if (flag)
+					{
+						pos_.y -= SPEED;
+						dir_ = DIR::Up;
 
 
+					}
+
+					return true;
 				}
-
-				return true;
 			}
+
 		}
 		return false;
-
 		});
+
 	InputList_.emplace_back([&](CntData data, bool flag) {
 
 		if (data[InputID::Right][static_cast<int>(Trg::Now)])
 		{
-			if (CheckList_[InputID::Right]())
+			if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32 + 1] == -1)
 			{
-				if (flag)
+				if (CheckList_[InputID::Right]())
 				{
-					pos_.x += SPEED;
+					if (flag)
+					{
+						pos_.x += SPEED;
 
-					dir_ = DIR::Right;
+						dir_ = DIR::Right;
 
+					}
+					return true;
 				}
-				return true;
 			}
+
 		}
+
 		return false;
 
 		});
@@ -496,17 +650,21 @@ void Player::InputInit()
 
 		if (data[InputID::Left][static_cast<int>(Trg::Now)])
 		{
-			if (CheckList_[InputID::Left]())
+			if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == -1)
 			{
-				if (flag)
+				if (CheckList_[InputID::Left]())
 				{
-					pos_.x -= SPEED;
-					dir_ = DIR::Left;
+					if (flag)
+					{
+						pos_.x -= SPEED;
+						dir_ = DIR::Left;
 
 
+					}
+					return true;
 				}
-				return true;
 			}
+
 		}
 		return false;
 
@@ -522,7 +680,7 @@ void Player::InputInit()
 			{
 				if (cnt_ - 1 < 4)
 				{
-					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_, std::chrono::system_clock::now(), true);
+					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_,3, std::chrono::system_clock::now(), true);
 
 				}
 
@@ -534,6 +692,51 @@ void Player::InputInit()
 
 		});
 
+
+}
+
+bool Player::MapCheck(int no)
+{
+	
+	switch (dir_)
+	{
+	case DIR::Up:
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == no)
+		{
+			return false;
+		}
+
+		break;
+	case DIR::Right:
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32 + 1] == no)
+		{
+			return false;
+
+		}
+
+		break;
+	case DIR::Down:
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32 + 1][(pos_.x) / 32] == no)
+		{
+			return false;
+
+		}
+
+		break;
+	case DIR::Left:
+		if (IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] == no)
+		{
+			return false;
+
+		}
+
+		break;
+
+	default:
+		break;
+	}
+
+	return true;
 
 }
 

@@ -50,7 +50,7 @@ public:
 
 	MapPair pairMap_;
 
-
+	int checkMap_[17][21];
 	void SendTmx();
 
 

@@ -8,6 +8,11 @@ Obj::~Obj()
 {
 }
 
+Vector2 Obj::GetPos()
+{
+	return pos_;
+}
+
 bool Obj::GetAlive()
 {
 
@@ -23,6 +28,11 @@ bool Obj::GetIsDeath()
 int Obj::GetID()
 {
 	return id_;
+}
+
+int Obj::GetZorder()
+{
+	return zorder_;
 }
 
 

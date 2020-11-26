@@ -17,6 +17,9 @@ void SceneMng::Run(void)
 		//AST();
 	}
 
+	SetUseZBufferFlag(TRUE);
+	SetWriteZBufferFlag(TRUE);
+
 	Scene_ = std::make_unique<TitleScene>();
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)

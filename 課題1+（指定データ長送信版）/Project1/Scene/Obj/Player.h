@@ -32,19 +32,22 @@ public:
 	void UpdateNet(void);
 
 	void Draw(void)override;
-	void SendData();
-
+	void SendPos();
+	void SendDeath();
 	bool isPacket()override;
 	void RevData();
 
 	void RunCheck();
 
-	static int fallCnt_;
 	int GetFallCnt();
 
+	ObjID GetObjID()override;
 
 	void InputInit();
+	
+	static int fallCnt_;
 
+	bool MapCheck(int no);
 private:
 	Vector2 speed_;
 
@@ -66,7 +69,9 @@ private:
 
 	int runCnt_;
 
+	std::map<DIR, std::vector<int>> animePlayer_;
 
+	std::chrono::system_clock::time_point start_, end_;
 
 
 };

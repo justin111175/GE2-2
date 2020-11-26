@@ -10,7 +10,12 @@ class Obj;
 
 using unique_Obj = std::unique_ptr<Obj>;							// スマートポインタ-BaseScene
 
-
+enum class ObjID
+{
+	PLAYER,
+	FIRE,
+	MAX
+};
 
 class Obj
 {
@@ -22,19 +27,23 @@ public:
 
 	
 	virtual void Draw(void) = 0;
+	virtual ObjID GetObjID() = 0;
 
 	virtual bool isPacket()=0;
 
+	Vector2 GetPos();
 	bool GetAlive();
 	bool GetIsDeath();
 	int GetID();
+	int GetZorder();
 private:
 
 
 
 protected:
+	int zorder_;
 	Vector2 pos_;
-
+	ObjID objID_;
 	int id_;
 	bool isAlive;
 	bool isDeath;

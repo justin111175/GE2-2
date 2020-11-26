@@ -131,11 +131,12 @@ public:
 	std::vector<RevPacket> TypePacket_;
 
 	std::list<MesPacket> palyerList_;
+
+
 	MesPacket posPacket_;
 	
 	MesPacket GetPacket(int id);
 	MesPacket GetPacket(MesType type);
-	VecMap GetMap();
 
 	void EraserPac();
 private:

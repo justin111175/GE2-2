@@ -256,16 +256,25 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
     if (type == MesType::SET_BOMB)
     {
 
-        // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
-        //if (sendSize >= mesPacket.size())
-        {
-            //SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
-            SetHeader(Header{ type,0,0,6 }, mesPacket);
 
-            NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
-            //TRACE("送信した\n");
-            return true;
-        }
+        SetHeader(Header{ type,0,0,7 }, mesPacket);
+
+        NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
+        return true;
+        
+
+
+    }
+
+    if (type == MesType::DEATH)
+    {
+
+        SetHeader(Header{ type,0,0,1 }, mesPacket);
+
+        NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
+
+        return true;
+        
 
 
     }
@@ -786,34 +795,10 @@ MesPacket NetWork::GetPacket(MesType type)
 
     }
 
-    //if (VecID_.size())
-    //{
-    //    for (auto& data : VecID_)
-    //    {
-    //        if (data.data())
-    //        {
-    //            if (data[0].iData == id)
-    //            {
-    //                data_ = data;
-    //                data[0].iData = -1;
-    //            }
-    //        }
-    //        else
-    //        {
-    //            data = MesPacket{ UnionData{0} };
-    //            data[0].iData = -1;
-    //        }
 
-    //    }
-    //}
 
     return data_;
 
-
-
-
-
-    return MesPacket();
 }
 
 
@@ -928,6 +913,17 @@ void NetWork::RevInit()
     });
 
     revFunc_.try_emplace(MesType::SET_BOMB, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        TRACE("TEST");
+        });
+
+    revFunc_.try_emplace(MesType::DEATH, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         // ヘッダーの部分確保する
         revPacket_.resize(revMesHeader_.length);
