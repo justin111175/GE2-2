@@ -5,15 +5,7 @@
 #include <utility>
 #include <functional>
 
-enum class DIR
-{
-	Down,
-	Left,
-	Right,
-	Up,
-	Death,
-	MAX
-};
+
 
 #define SPEED 4
 #define UNIT_ID_BASE 5

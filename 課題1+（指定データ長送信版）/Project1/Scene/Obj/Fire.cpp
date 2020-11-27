@@ -1,6 +1,6 @@
 #include "Fire.h"
 #include "../GameScene.h"
-
+#include "../SceneMng.h"
 
 Fire::Fire(Vector2 pos,int lengh, BaseScene& scene):scene_(scene)
 {
@@ -9,7 +9,7 @@ Fire::Fire(Vector2 pos,int lengh, BaseScene& scene):scene_(scene)
 	isAlive = true;
 	isDeath = false;
 	count_ = 0;
-
+	tmpCnt_ = 0;
 	zorder_ = 1;
 
 
@@ -22,113 +22,84 @@ Fire::Fire(Vector2 pos,int lengh, BaseScene& scene):scene_(scene)
 	vecfire_.emplace_back(0);
 
 	lengh_ = lengh-1;
-	vecPairFire_.resize(4);
+
 
 	TRACE("FIRE_TEST");
-	cnt_ = 0;
 	
 
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < lengh; i++)
 	{
-		vecPairFire_[i].first = false;
-
+		cnt_.emplace_back(lengh);
 	}
 
 
 	Vector2 tmpPos = pos_ / 32;
+	vecPairFire_.resize(4);
 
-	//上
-	
-	if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- (lengh_-1)][tmpPos.x ] == 8)
+	for (int i = 0; i < 4; i++)
 	{
-		vecPairFire_[0].first = true;
-		IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- (lengh_-1)][tmpPos.x ] = 0;
+		vecPairFire_[i].first = false;
+		vecPairFire_[i].second = 0;
 	}
-	else
+
+
+	for (int i = 1; i <= lengh_; i++)
 	{
-		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- (lengh_ - 1)][tmpPos.x ] == 0)
+
+		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y - i][tmpPos.x] != 0)
 		{
-			vecPairFire_[0].second = lengh_-1;
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- lengh_][tmpPos.x ] == 0)
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y - i][tmpPos.x] == 8)
 			{
-				vecPairFire_[0].second = lengh_;
+				vecPairFire_[0].first = true;
 			}
-			else if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- lengh_][tmpPos.x] == 8)
-			{
-				vecPairFire_[0].second = lengh_;
-			}
+			vecPairFire_[0].second = i;
+			break;
 		}
 	}
 
-	//右
-	if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x+1] == 8)
+	for (int i = 1; i <= lengh_; i++)
 	{
 
-		vecPairFire_[1].first = true;
-		IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 1] = 0;
-	}
-	else
-	{
-		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 1] == 0)
+		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + i] != 0)
 		{
-			vecPairFire_[1].second = 1;
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 2] == 0)
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + i] == 8)
 			{
-				vecPairFire_[1].second = 2;
+				vecPairFire_[1].first = true;
 			}
-			else if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 2] == 8)
-			{
-				vecPairFire_[1].second = 2;
-			}
+			vecPairFire_[1].second = i;
+			break;
 		}
 	}
 
-
-	//下
-	if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + 1][tmpPos.x] == 8)
+	for (int i = 1; i <= lengh_; i++)
 	{
 
-		vecPairFire_[2].first = true;
-		IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y+ 1][tmpPos.x ] = 0;
-	}
-	else
-	{
-		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y+ 1][tmpPos.x ] == 0)
+		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + i][tmpPos.x] != 0)
 		{
-			vecPairFire_[2].second = 1;
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y+ 2][tmpPos.x ] == 0)
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + i][tmpPos.x] == 8)
 			{
-				vecPairFire_[2].second = 2;
+				vecPairFire_[2].first = true;
 			}
-			else if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + 2][tmpPos.x] == 8)
-			{
-				vecPairFire_[2].second = 2;
-			}
+			vecPairFire_[2].second = i;
+			break;
 		}
 	}
-	//左
-	if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x- 1] == 8)
+
+	for (int i = 1; i <= lengh_; i++)
 	{
 
-		vecPairFire_[3].first = true;
-		IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x - 1] = 0;
-	}
-	else
-	{
-		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x - 1] == 0)
+		if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x - i] != 0)
 		{
-			vecPairFire_[3].second = 1;
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x-2] == 0)
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x - i] == 8)
 			{
-				vecPairFire_[3].second = 2;
+				vecPairFire_[3].first = true;
 			}
-			else if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x - 2] == 8)
-			{
-				vecPairFire_[3].second = 2;
-			}
+			vecPairFire_[3].second = i;
+			break;
 		}
 	}
+
 
 
 }
@@ -155,63 +126,103 @@ void Fire::Update(void)
 	if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(1000).count()/6)
 	{
 
-		count_++;
+		for (int i = 0; i <= tmpCnt_; i++)
+		{
+			if (cnt_[i] >= 0)
+			{
+				cnt_[i]--;
+
+			}
+
+		}
+		if (tmpCnt_ <= lengh_-1)
+		{
+			tmpCnt_++;
+
+		}
+		
+		if (tmpCnt_ > 1)
+		{
+			count_++;
+
+		}
+		if (animeCnt_ < 7)
+		{
+			animeCnt_++;
+		}
 		start_ = std::chrono::system_clock::now();
 
 	}
 
 
-	if (count_ >=7)
+	if (count_ >lengh_*2)
 	{
 		isAlive = false;
 		isDeath = true;
 
 	}
 
-	if (count_ >= 3)
+	//if (vecPairFire_[0].first)
 	{
-		if (vecPairFire_[0].second == 2)
+		if (count_ >= vecPairFire_[0].second)
 		{
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y- 2][tmpPos.x ] == 8)
+
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y - vecPairFire_[0].second][tmpPos.x] == 8)
 			{
 
-				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y - 2][tmpPos.x ] = 0;
-				IpNetwork.tmx_->checkMap_[tmpPos.y- 2][tmpPos.x ] = 1;
+				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y - vecPairFire_[0].second][tmpPos.x] = 0;
+				//IpNetwork.tmx_->checkMap_[tmpPos.y - 2][tmpPos.x] = 1;
 
 			}
+		
 		}
-		if (vecPairFire_[1].second == 2)
+	}
+
+
+	//if (vecPairFire_[1].first)
+	{
+		if (count_ >= vecPairFire_[1].second)
 		{
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 2] == 8)
+
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x+ vecPairFire_[1].second] == 8)
 			{
 
-				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x + 2] = 0;
-				IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x+ 2] = 1;
-
-			}
-		}
-
-		if (vecPairFire_[2].second == 2)
-		{
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + 2][tmpPos.x] == 8)
-			{
-
-				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y + 2][tmpPos.x] = 0;
-				IpNetwork.tmx_->checkMap_[tmpPos.y + 2][tmpPos.x] = 1;
-
-			}
-		}
-		if (vecPairFire_[3].second == 2)
-		{
-			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x - 2] == 8)
-			{
-
-				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y][tmpPos.x - 2] = 0;
-				IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x- 2] = 1;
+				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x+ vecPairFire_[1].second] = 0;
 
 			}
 		}
 	}
+
+
+	//if (vecPairFire_[2].first)
+	{
+		if (count_ >= vecPairFire_[2].second)
+		{
+
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y+ vecPairFire_[2].second][tmpPos.x ] == 8)
+			{
+
+				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y+ vecPairFire_[2].second][tmpPos.x ] = 0;
+
+			}
+		}
+	}
+
+	//if (vecPairFire_[3].first)
+	{
+		if (count_ >= vecPairFire_[3].second)
+		{
+
+			if (IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x- vecPairFire_[3].second] == 8)
+			{
+
+				IpNetwork.tmx_->pairMap_["3"].second[tmpPos.y ][tmpPos.x- vecPairFire_[3].second] = 0;
+
+			}
+		}
+	}
+
+	
 
 
 	
@@ -222,183 +233,425 @@ void Fire::Draw(void)
 {
 
 	Vector2 tmpPos = pos_ / 32;
-	int tmp = count_ / 10 % 7;
+	int tmpCnt =( animeCnt_ - 1) % 7;
 
-	if (count_ <= 4)
+	if (cnt_[0] > 0)
 	{
-		DrawGraph(pos_.x, pos_.y, IpImageMng.GetID("Fire")[vecfire_[count_%7]], true);
-		IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] = 1;
+		DrawGraph(pos_.x, pos_.y, IpImageMng.GetID("Fire")[vecfire_[tmpCnt]], true);
+
 	}
-
-
-	//上
-	if (vecPairFire_[0].first)
+	//auto DRAW_DIR = [&](Vector2 pos,int i,int no,) {
+	//
+	//	if (vecPairFire_[0].first)
+	//	{
+	//		if (i <= vecPairFire_[0].second - 1)
+	//		{
+	//			if (i == vecPairFire_[0].second - 1)
+	//			{
+	//				DrawRotaGraph3(pos.x, pos.y , 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+	//			}
+	//			else
+	//			{
+	//				DrawRotaGraph3(pos.x, pos.y , 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+	//			}
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (i < vecPairFire_[0].second - 1)
+	//		{
+	//			if (i >= lengh_ - 1)
+	//			{
+	//				DrawRotaGraph3(pos.x, pos.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+	//			}
+	//			else
+	//			{
+	//				DrawRotaGraph3(pos.x, pos.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+	//			}
+	//		}
+	//	}
+	//
+	//
+	//};
+	
+	for (int i =0; i < lengh_; i++)
 	{
-		if (count_ > 1)
-		{
-			DrawRotaGraph3(pos_.x, pos_.y, 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
-			IpNetwork.tmx_->checkMap_[tmpPos.y-1][tmpPos.x] = 1;
-		}
-	}
-	else
-	{
-		for (int i = 1; i <= vecPairFire_[0].second; i++)
-		{
-			if (count_ < 4)
-			{
-				if (count_ >= i)
-				{
-					DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
-					IpNetwork.tmx_->checkMap_[tmpPos.y -i][tmpPos.x] = 1;
 
-				}
-			}
-			else
+		if (cnt_[i] >= 0)
+		{
+			if (count_> i)
 			{
-				if (count_ < 5 + i)
+				//上
+				if (vecPairFire_[0].first)
 				{
-					DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+					if (i <= vecPairFire_[0].second-1 )
+					{
+						if (i == vecPairFire_[0].second -1)
+						{
+							DrawRotaGraph3(pos_.x, pos_.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y - i][tmpPos.x] = 1;
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x, pos_.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y - i][tmpPos.x] = 1;
+						}
+					}
 				}
 				else
 				{
-					if (vecPairFire_[0].second > 1)
-					{
-						i++;
-						DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
 
+					if (vecPairFire_[0].second == 0)
+					{
+						if (i >= lengh_ - 1)
+						{
+							DrawRotaGraph3(pos_.x, pos_.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y - i][tmpPos.x] = 1;
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x, pos_.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y - i][tmpPos.x] = 1;
+						}
+					}
+					else
+					{
+						if (i <= vecPairFire_[0].second - 2)
+						{
+
+							DrawRotaGraph3(pos_.x, pos_.y - 32 * (i), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y - i][tmpPos.x] = 1;
+
+						}
 					}
 				}
-			}
-		}
-	}
+				
+				//右
 
-
-
-	//右
-	if (vecPairFire_[1].first)
-	{
-		if (count_ > 1)
-		{
-			DrawRotaGraph3(pos_.x + 32, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + 2], true, false);
-			IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x+1] = 1;
-
-		}
-	}
-	else
-	{
-		for (int i = 1; i <= vecPairFire_[1].second; i++)
-		{
-			if (count_ < 4)
-			{
-				if (count_ >= i)
+				if (vecPairFire_[1].first)
 				{
-					DrawRotaGraph3(pos_.x + 32 * i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
-					IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x +i] = 1;
-
-				}
-			}
-			else
-			{
-				if (count_ < 5+i)
-				{
-					DrawRotaGraph3(pos_.x + 32 *i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+					if (i <= vecPairFire_[1].second - 1)
+					{
+						if (i == vecPairFire_[1].second - 1)
+						{
+							DrawRotaGraph3(pos_.x + 32 * (i + 1), pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x+1] = 1;
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x + 32 * (i + 1), pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x + 1] = 1;
+						}
+					}
 				}
 				else
 				{
-					if (vecPairFire_[1].second > 1)
+					if (vecPairFire_[1].second == 0)
 					{
-						i++;
-						DrawRotaGraph3(pos_.x + 32 * i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+						if (i >= lengh_ - 1)
+						{
+							DrawRotaGraph3(pos_.x + 32 * (i + 1), pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x + 1] = 1;
+
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x + 32 * (i + 1), pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x + 1] = 1;
+
+						}
+					}
+					else
+					{
+						if (i <= vecPairFire_[1].second - 2)
+						{
+
+							DrawRotaGraph3(pos_.x + 32 * (i + 1), pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x + 1] = 1;
+
+
+						}
 					}
 				}
-			}
-		}
-	}
+				//下
 
-	////下
-
-	if (vecPairFire_[2].first)
-	{
-		if (count_ > 1)
-		{
-			DrawRotaGraph3(pos_.x + 32, pos_.y + 32, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
-			IpNetwork.tmx_->checkMap_[tmpPos.y+ 1][tmpPos.x ] = 1;
-
-		}
-	}
-	else
-	{
-		for (int i = 1; i <= vecPairFire_[2].second; i++)
-		{
-			if (count_ < 4)
-			{
-				if (count_ >= i)
+				if (vecPairFire_[2].first)
 				{
-					DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
-					IpNetwork.tmx_->checkMap_[tmpPos.y +i][tmpPos.x] = 1;
+					if (i <= vecPairFire_[2].second - 1)
+					{
+						if (i == vecPairFire_[2].second - 1)
+						{
+							DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * (i + 1), 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y+ 1][tmpPos.x ] = 1;
 
-				}
-			}
-			else
-			{
-				if (count_ <= 5 + i)
-				{
-					DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * (i + 1), 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y + 1][tmpPos.x] = 1;
+
+						}
+					}
 				}
 				else
 				{
-					if (vecPairFire_[2].second >= 1)
+
+					if (vecPairFire_[2].second == 0)
 					{
-						i++;
-						DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+						if (i >= lengh_ - 1)
+						{
+							DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * (i + 1), 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y + 1][tmpPos.x] = 1;
+
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * (i + 1), 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y + 1][tmpPos.x] = 1;
+
+						}
 					}
-				}
-			}
-		}
-	}
+					else
+					{
+						if (i <= vecPairFire_[2].second - 2)
+						{
+
+							DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * (i + 1), 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y + 1][tmpPos.x] = 1;
 
 
+						}
+					}
 
-	//左
-	if (vecPairFire_[3].first)
-	{
-		if (count_ > 1)
-		{
-			DrawRotaGraph3(pos_.x, pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
-			IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
-
-		}
-	}
-	else
-	{
-		for (int i = 1; i <= vecPairFire_[3].second; i++)
-		{
-			if (count_ < 4)
-			{
-				if (count_ >= i)
-				{
-					DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
-					IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x -i] = 1;
 
 				}
-			}
-			else
-			{
-				if (count_ <= 5 + i)
+
+				//左
+				if (vecPairFire_[3].first)
 				{
-					DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+					if (i <= vecPairFire_[3].second - 1)
+					{
+						if (i == vecPairFire_[3].second - 1)
+						{
+							DrawRotaGraph3(pos_.x - 32 * (i), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x- 1] = 1;
+
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x - 32 * (i), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
+
+						}
+					}
 				}
 				else
 				{
-					if (vecPairFire_[3].second >= 1)
+					if (vecPairFire_[3].second == 0)
 					{
-						i++;
-						DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+						if (i >= lengh_ - 1)
+						{
+							DrawRotaGraph3(pos_.x - 32 * (i), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 2], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
+
+						}
+						else
+						{
+							DrawRotaGraph3(pos_.x - 32 * (i), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
+
+						}
 					}
+					else
+					{
+						if (i <= vecPairFire_[3].second - 2)
+						{
+
+							DrawRotaGraph3(pos_.x - 32 * (i), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[tmpCnt] + 1], true, false);
+							IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
+
+							
+						}
+					}
+
 				}
+
 			}
-		}
+		}	
+
 	}
+
+
+
+
+	////上
+	//if (vecPairFire_[0].first)
+	//{
+	//	if (count_ > 1)
+	//	{
+	//		DrawRotaGraph3(pos_.x, pos_.y, 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
+	//		IpNetwork.tmx_->checkMap_[tmpPos.y-1][tmpPos.x] = 1;
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i = 1; i <= vecPairFire_[0].second; i++)
+	//	{
+	//		if (count_ < 4)
+	//		{
+	//			if (count_ >= i)
+	//			{
+	//				DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//				IpNetwork.tmx_->checkMap_[tmpPos.y -i][tmpPos.x] = 1;
+
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (count_ < 5 + i)
+	//			{
+	//				DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//			}
+	//			else
+	//			{
+	//				if (vecPairFire_[0].second > 1)
+	//				{
+	//					i++;
+	//					DrawRotaGraph3(pos_.x, pos_.y - 32 * (i - 1), 0, 0, 1.0f, 1.0f, 270 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+
+
+	////右
+	//if (vecPairFire_[1].first)
+	//{
+	//	if (count_ > 1)
+	//	{
+	//		DrawRotaGraph3(pos_.x + 32, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + 2], true, false);
+	//		IpNetwork.tmx_->checkMap_[tmpPos.y ][tmpPos.x+1] = 1;
+
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i = 1; i <= vecPairFire_[1].second; i++)
+	//	{
+	//		if (count_ < 4)
+	//		{
+	//			if (count_ >= i)
+	//			{
+	//				DrawRotaGraph3(pos_.x + 32 * i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+	//				IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x +i] = 1;
+
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (count_ < 5+i)
+	//			{
+	//				DrawRotaGraph3(pos_.x + 32 *i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+	//			}
+	//			else
+	//			{
+	//				if (vecPairFire_[1].second > 1)
+	//				{
+	//					i++;
+	//					DrawRotaGraph3(pos_.x + 32 * i, pos_.y, 0, 0, 1.0f, 1.0f, 0, IpImageMng.GetID("Fire")[vecfire_[count_ % 7] + i], true, false);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	//////下
+
+	//if (vecPairFire_[2].first)
+	//{
+	//	if (count_ > 1)
+	//	{
+	//		DrawRotaGraph3(pos_.x + 32, pos_.y + 32, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
+	//		IpNetwork.tmx_->checkMap_[tmpPos.y+ 1][tmpPos.x ] = 1;
+
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i = 1; i <= vecPairFire_[2].second; i++)
+	//	{
+	//		if (count_ < 4)
+	//		{
+	//			if (count_ >= i)
+	//			{
+	//				DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//				IpNetwork.tmx_->checkMap_[tmpPos.y +i][tmpPos.x] = 1;
+
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (count_ <= 5 + i)
+	//			{
+	//				DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//			}
+	//			else
+	//			{
+	//				if (vecPairFire_[2].second >= 1)
+	//				{
+	//					i++;
+	//					DrawRotaGraph3(pos_.x + 32, pos_.y + 32 * i, 0, 0, 1.0f, 1.0f, 90 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+
+
+	////左
+	//if (vecPairFire_[3].first)
+	//{
+	//	if (count_ > 1)
+	//	{
+	//		DrawRotaGraph3(pos_.x, pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + 2], true, false);
+	//		IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x - 1] = 1;
+
+	//	}
+	//}
+	//else
+	//{
+	//	for (int i = 1; i <= vecPairFire_[3].second; i++)
+	//	{
+	//		if (count_ < 4)
+	//		{
+	//			if (count_ >= i)
+	//			{
+	//				DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//				IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x -i] = 1;
+
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (count_ <= 5 + i)
+	//			{
+	//				DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//			}
+	//			else
+	//			{
+	//				if (vecPairFire_[3].second >= 1)
+	//				{
+	//					i++;
+	//					DrawRotaGraph3(pos_.x - 32 * (i - 1), pos_.y + 32, 0, 0, 1.0f, 1.0f, 180 * DEG, IpImageMng.GetID("Fire")[vecfire_[count_  % 7] + i], true, false);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 }
 
@@ -410,4 +663,18 @@ bool Fire::isPacket()
 ObjID Fire::GetObjID()
 {
 	return ObjID();
+}
+
+void Fire::DrawInit()
+{
+
+	Drawfire_.try_emplace(0, [](int lengh_) {});
+	Drawfire_.try_emplace(1, [](int lengh_) {});
+	Drawfire_.try_emplace(2, [](int lengh_) {});
+	Drawfire_.try_emplace(3, [](int lengh_) {});
+	Drawfire_.try_emplace(4, [](int lengh_) {});
+	Drawfire_.try_emplace(5, [](int lengh_) {});
+	Drawfire_.try_emplace(6, [](int lengh_) {});
+
+
 }

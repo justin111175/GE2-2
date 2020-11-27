@@ -8,6 +8,15 @@
 
 using PairFire = std::pair<bool, int>;
 
+enum class FIRE_DIR
+{
+	’†ŠÔ,
+	UP,
+	RIGHT,
+	DOWN,
+	LEFT
+};
+
 class Fire :
 	public Obj
 {
@@ -20,20 +29,21 @@ public:
 	void Draw(void)override;
 	bool isPacket()override;
 	ObjID GetObjID()override;
-
+	void DrawInit();
 private:
 	BaseScene& scene_;
 
 	std::chrono::system_clock::time_point start_, end_;
-	int count_;
 	std::vector<PairFire> vecPairFire_;
 
 	std::vector<int> vecfire_;
 	int fireWidth_;
 
-	VecMap pairMap_;
-	int cnt_;
 	int lengh_;
-
+	int animeCnt_;
+	int count_;
+	std::vector<int> cnt_;
+	int tmpCnt_;
+	std::map<int, std::function<void(int)>> Drawfire_;
 };
 

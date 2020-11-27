@@ -680,7 +680,7 @@ void Player::InputInit()
 			{
 				if (cnt_ - 1 < 4)
 				{
-					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_,3, std::chrono::system_clock::now(), true);
+					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_,6, std::chrono::system_clock::now(), true);
 
 				}
 

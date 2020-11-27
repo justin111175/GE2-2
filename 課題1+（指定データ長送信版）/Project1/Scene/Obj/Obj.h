@@ -8,6 +8,15 @@
 #include "../../common/_debug/_DebugDispOut.h"
 class Obj;
 
+enum class DIR
+{
+	Down,
+	Left,
+	Right,
+	Up,
+	Death,
+	MAX
+};
 using unique_Obj = std::unique_ptr<Obj>;							// スマートポインタ-BaseScene
 
 enum class ObjID
