@@ -8,9 +8,19 @@
 #include "../../common/_debug/_DebugConOut.h"
 int Player::fallCnt_ = 0;
 
-Player::Player(Vector2 pos, int id, BaseScene& scene)
+Player::Player(Vector2 pos, int id, BaseScene& scene,int playerID)
 	:scene_(scene)
 {
+	if (id == playerID)
+	{
+		playerType_ = playerType::Ž©•ª;
+	}
+	else
+	{
+		playerType_ = playerType::‘ŠŽè;
+	}
+
+
 
 	pos_ = { 32 * pos.x, 32 * pos.y };
 
@@ -71,7 +81,6 @@ Player::Player(Vector2 pos, int id, BaseScene& scene)
 
 	zorder_ = 0;
 	objID_ = ObjID::PLAYER;
-
 }
 
 Player::~Player()
@@ -91,9 +100,11 @@ void Player::Update(void)
 	MesPacket data_ = IpNetwork.GetPacket(MesType::DEATH);
 
 
-
 	if (isAlive)
 	{
+
+
+
 
 		if (data_.size())
 		{
@@ -105,77 +116,99 @@ void Player::Update(void)
 		}
 
 
-		if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+		switch (playerType_)
 		{
-
-			if (id_ != 5)
-			{
-
-				if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-				{
-					SendDeath();
-					runCnt_ = 0;
-
-					isAlive = false;
-				}
-
-				if (id_ == 0)
-				{
-					if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-					{
-						runCnt_ = 0;
-						isAlive = false;
-					}
-					UpdateDef(conType::Key);
-
-				}
-				else
-				{
-					UpdateAuto();
-				}
-			}
-		}
-		else if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
-		{
-			if (id_ != 0)
-			{
-
-				if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-				{
-					SendDeath();
-					runCnt_ = 0;
-
-					isAlive = false;
-				}
-				if (id_ == 5)
-				{
-
-					UpdateDef(conType::Key);
-				}
-				else
-				{
-					UpdateAuto();
-				}
-			}
-		}
-		else if(IpNetwork.GetNetWorkMode() == NetWorkMode::OFFLINE)
-		{
+		case playerType::Ž©•ª:
 			if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
 			{
 				SendDeath();
 				runCnt_ = 0;
+
 				isAlive = false;
 			}
-			if (id_ == 0)
-			{
-				UpdateDef(conType::Key);
+			UpdateDef(conType::Key);
 
-			}
-			else
-			{
-				UpdateAuto();
-			}
+			break;
+		case playerType::‘ŠŽè:
+			RevData();
+
+			break;
+		default:
+			break;
 		}
+		//if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
+		//{
+
+		//	if (id_ != 5)
+		//	{
+
+		//		if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+		//		{
+		//			SendDeath();
+		//			runCnt_ = 0;
+
+		//			isAlive = false;
+		//		}
+
+		//		if (id_ == 0)
+		//		{
+		//			if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+		//			{
+		//				runCnt_ = 0;
+		//				isAlive = false;
+		//			}
+		//			UpdateDef(conType::Key);
+
+		//		}
+		//		else
+		//		{
+		//			UpdateAuto();
+		//		}
+		//	}
+		//}
+		//else if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
+		//{
+		//	if (id_ != 0)
+		//	{
+
+		//		if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+		//		{
+		//			SendDeath();
+		//			runCnt_ = 0;
+
+		//			isAlive = false;
+		//		}
+
+		//		if (id_ == 5)
+		//		{
+
+		//			UpdateDef(conType::Key);
+		//		}
+		//		else
+		//		{
+		//			UpdateAuto();
+
+		//		}
+		//	}
+		//}
+		//else if(IpNetwork.GetNetWorkMode() == NetWorkMode::OFFLINE)
+		//{
+		//	if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+		//	{
+		//		SendDeath();
+		//		runCnt_ = 0;
+		//		isAlive = false;
+		//	}
+		//	if (id_ == 0)
+		//	{
+		//		UpdateDef(conType::Key);
+
+		//	}
+		//	else
+		//	{
+		//		UpdateAuto();
+		//	}
+		//}
 	}
 	else
 	{
@@ -205,7 +238,6 @@ void Player::UpdateDef(conType input)
 {
 
 	(*controller[input])();
-	int count;
 
 	auto keyData = controller[input]->GetCntData();
 
@@ -241,7 +273,7 @@ void Player::UpdateAuto(void)
 		}
 		else
 		{
-			//RevData();
+			RevData();
 
 		}
 	}
@@ -252,10 +284,11 @@ void Player::UpdateAuto(void)
 			SendPos();
 
 			RunCheck();
+
 		}
 		else
 		{
-			//RevData();
+			RevData();
 		}
 	}
 	else
@@ -311,7 +344,7 @@ void Player::SendPos()
 	unionD.iData = static_cast<int>(dir_);
 	data.insert(data.end(), unionD);
 
-	IpNetwork.SendMes(MesType::POS, data);
+	IpNetwork.SendMes(MesType::POS, data,IpNetwork.GetHandle());
 
 }
 
@@ -326,7 +359,7 @@ void Player::SendDeath()
 
 
 
-	IpNetwork.SendMes(MesType::DEATH, data);
+	IpNetwork.SendMes(MesType::DEATH, data, IpNetwork.GetHandle());
 
 
 }
@@ -459,6 +492,8 @@ ObjID Player::GetObjID()
 {
 	return objID_;
 }
+
+
 
 void Player::InputInit()
 {

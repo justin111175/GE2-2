@@ -24,18 +24,20 @@ public:
 	int GetBombSize(int ownID_);
 
 	void RevBomb();
-
-	Vector2 GetObjPos();
 private:
 	void Draw();
 	void DrawOwn() override;
 
-	//std::vector<std::unique_ptr<Character>> playList_;
+	void GetPlayerPac();
+	void GetStartTime();
+	void EraserLost();
+	int lostID_;
+	std::pair<int, int> playerPac_;
 
 	std::list<unique_Obj> objList_;
 
 
-	std::chrono::system_clock::time_point start_, end_;
+	std::chrono::system_clock::time_point start_, end_, start_time_;
 	std::vector<int> fallCnt;
 	int Cnt_;
 	int count_;

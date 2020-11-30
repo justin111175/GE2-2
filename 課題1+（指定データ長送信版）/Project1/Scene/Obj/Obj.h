@@ -43,6 +43,7 @@ public:
 	Vector2 GetPos();
 	bool GetAlive();
 	bool GetIsDeath();
+	bool SetIsDeath(bool);
 	int GetID();
 	int GetZorder();
 private:

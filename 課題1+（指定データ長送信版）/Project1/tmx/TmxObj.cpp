@@ -267,8 +267,8 @@ void TmxObj::SendTmx()//host
 
 	}
 	int count = 0;
-	IpNetwork.SendMes(MesType::TMX_SIZE,data);
-	IpNetwork.SendMes(MesType::TMX_DATA,data);
+	//IpNetwork.SendMes(MesType::TMX_SIZE,data);
+	//IpNetwork.SendMes(MesType::TMX_DATA,data);
 
 
 }

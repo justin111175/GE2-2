@@ -55,11 +55,7 @@ LoginScene::LoginScene()
 			}
 		}
 	}
-	else
-	{
 
-
-	}
 		mean_.try_emplace(LoginMean_ID::HOST, "オンライン【ホスト】");
 		mean_.try_emplace(LoginMean_ID::GEST, "オンライン【ゲスト】");
 		mean_.try_emplace(LoginMean_ID::GEST_BEFORE, "オンライン【前回ゲスト】");
@@ -86,6 +82,56 @@ LoginScene::LoginScene()
 
 LoginScene::~LoginScene()
 {
+}
+
+void LoginScene::GetCount_Down()
+{
+	MesPacket data_;
+	data_ = IpNetwork.GetPacket(MesType::COUNT_DOWN);
+	UnionTime time = { std::chrono::system_clock::now() };
+
+	if (data_.size())
+	{
+		time.iData[0] = data_[0].iData;
+		time.iData[1] = data_[1].iData;
+
+	}
+
+
+
+}
+
+void LoginScene::GetTmx()
+{
+
+	MesPacket data_;
+	data_ = IpNetwork.GetPacket(MesType::TMX_SIZE);
+	if (data_.size())
+	{
+		for (int i = 0; i < data_.size(); i++)
+		{
+			IpNetwork.revtmx_.insert(IpNetwork.revtmx_.end(), { data_[i] });
+		}
+	}
+
+
+		// パゲットがない場合新しい情報をとって、確保する
+		//if (revPacket_.size() == 0)
+		//{
+		//	NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
+		//	revPacket_.resize(revMesHeader_.length);
+		//	NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+		//}
+		// 確保したデータを後ろに追加する
+
+
+
+	//if (data_.size())
+	//{
+	//	time.iData[0] = data_[0].iData;
+	//	time.iData[1] = data_[1].iData;
+
+	//}
 }
 
 
@@ -174,7 +220,6 @@ void LoginScene::GEST()
 
 	IPDATA hostIP;					// ホストのIP
 
-	IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
 	TRACE("IPアドレスを入力してください\n");
 	std::string ip, data;
 	KeyInputSingleCharString(200, 200, 30, Name, false);
@@ -194,9 +239,12 @@ void LoginScene::GEST()
 	hostIP.d2 = GetIpNum();
 	hostIP.d3 = GetIpNum();
 	hostIP.d4 = GetIpNum();
+	
+	IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
 
 	if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
-	{
+	{	
+
 		std::ofstream ofp("ini/hostIP.txt");
 		ofp << ip;
 		ofp.close();
@@ -291,7 +339,6 @@ void LoginScene::StartInit()
 		{
 			if (IpNetwork.revStanby_)
 			{
-
 				IpNetwork.RevTmx("map/test.tmx");
 				IpNetwork.SendStart();
 			}

@@ -23,6 +23,8 @@ public:
 	~LoginScene();
 
 private:
+	void GetCount_Down();
+	void GetTmx();
 	Vector2 screen_size_;
 
 	void Ctl(conType input);

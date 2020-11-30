@@ -14,10 +14,16 @@ GestState::~GestState()
 
 ActiveState GestState::ConnectHost(IPDATA hostIP)
 {
+	auto handle = ConnectNetWork(hostIP, portNum_);
+
 	// IPアドレスを入れて、接続できるかどうか
-	netHandle_ = ConnectNetWork(hostIP,portNum_);
-	if (netHandle_ >= 0)
+	netHandle_.emplace_back(handle,0);
+
+	if (handle >= 0)
 	{
+
+
+
 		active_ = ActiveState::Init;
 	}
 	
@@ -34,7 +40,7 @@ bool GestState::CheckNetWork()
 	if (GetLostNetWork() != -1)
 	{
 		//切断する
-		CloseNetWork(netHandle_);
+		CloseNetWork(netHandle_.front().first);
 	}
 	return true;
 }

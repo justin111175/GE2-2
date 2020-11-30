@@ -25,6 +25,12 @@ bool Obj::GetIsDeath()
 	return isDeath;
 }
 
+bool Obj::SetIsDeath(bool flag)
+{
+	isDeath = flag;
+	return true;
+}
+
 int Obj::GetID()
 {
 	return id_;

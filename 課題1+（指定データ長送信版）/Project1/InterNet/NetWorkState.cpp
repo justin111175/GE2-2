@@ -34,16 +34,10 @@ ActiveState NetWorkState::SetActive(ActiveState active)
 }
 
 
-
-void NetWorkState::Send(Vector2 pos)
-{
-	NetWorkSend(netHandle_, &pos, sizeof(pos));
-}
-
 void NetWorkState::SendStanby(bool stanby)
 {
 
-	NetWorkSend(netHandle_, &stanby, sizeof(stanby));
+	//NetWorkSend(netHandle_.front().first, &stanby, sizeof(stanby));
 	TRACE("初期化情報送信完了、開始待ち\n");
 
 }
@@ -53,15 +47,16 @@ void NetWorkState::SendStanby(bool stanby)
 Vector2 NetWorkState::Recv()
 {
 	Vector2 pos;
-	NetWorkRecv(netHandle_, &pos, sizeof(pos));
+	//NetWorkRecv(netHandle_.front().first, &pos, sizeof(pos));
 	return pos;
 }
 
 bool NetWorkState::RecvStanby()
 {
 	bool ready;
-	NetWorkRecv(netHandle_, &ready, sizeof(ready));
-	return ready;
+	//NetWorkRecv(netHandle_.front().first, &ready, sizeof(ready));
+	return false;
+	//return ready;
 
 }
 
@@ -79,7 +74,8 @@ bool NetWorkState::Updata(void)
 
 int NetWorkState::GetHandle()
 {
-	return netHandle_;
+	auto data = netHandle_.front().first;
+	return data;
 }
 
 

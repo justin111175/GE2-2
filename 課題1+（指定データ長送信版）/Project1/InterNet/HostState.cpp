@@ -34,7 +34,7 @@ bool HostState::CheckNetWork()
 	{
 		//接続があった、新規接続止め
 		TRACE("ゲストの接続\n");
-		netHandle_ = tmpID;
+		//netHandle_ = tmpID;
 		StopListenNetWork();
 		active_ = ActiveState::Init;
 		return true;

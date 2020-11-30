@@ -5,7 +5,12 @@
 #include <utility>
 #include <functional>
 
-
+enum class playerType
+{
+	Ž©•ª,
+	‘ŠŽè,
+	MAX
+};
 
 #define SPEED 4
 #define UNIT_ID_BASE 5
@@ -15,7 +20,7 @@ class Player :
 {
 public:
 
-	Player(Vector2 pos, int id,BaseScene& scene);
+	Player(Vector2 pos, int id,BaseScene& scene,int playerID);
 	~Player();
 	void Update(void) override;
 
@@ -35,12 +40,15 @@ public:
 
 	ObjID GetObjID()override;
 
+
 	void InputInit();
 	
 	static int fallCnt_;
 
 	bool MapCheck(int no);
 private:
+
+	playerType playerType_;
 	Vector2 speed_;
 
 	std::map<conType, std::unique_ptr<Controller>> controller;

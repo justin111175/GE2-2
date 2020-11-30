@@ -24,13 +24,17 @@ enum class UpdataMode
 enum class MesType:unsigned char
 {
 	NON=100,
+	COUNT_DOWN,						// 接続受付カントダウン
+	ID,								// 自分のIDとプレイヤーの数
 	STANDY,							// 初期化情報送信完了（ホスト用）
 	GAME_START,						// ホストからの初期化情報での初期化完了
+	START_TIME,						// 全員の初期化完了後ゲーム開始時間
 	TMX_SIZE,
 	TMX_DATA,						// 
 	POS,							// ゲーム中データ
 	SET_BOMB,						// ボムの設置
 	DEATH,							// 死亡-キャラクターID
+	LOST,							// 切断時に生成（ホストは自分のネットワークキャラにもセットする）
 	MAX
 };
 
@@ -88,11 +92,10 @@ public:
 	bool RevTmx(std::string);
 
 	bool SendMes(MesType type);
-	bool SendMes(MesType type, MesPacket& mesPacket);
+	bool SendMes(MesType type, MesPacket& mesPacket,int handle);
 
 	void GetSetting(const char* setting);
 
-	void Send(std::string file);
 
 	void SendStanby(void);
 	void SendStart();
@@ -107,7 +110,6 @@ public:
 
 	ActiveState GetActiv(void);
 
-	void NetRev();
 
 	bool revStanby_;
 	
@@ -134,7 +136,10 @@ public:
 
 
 	MesPacket posPacket_;
-	
+	MesPacket revtmx_;
+
+	int GetHandle();
+
 	MesPacket GetPacket(int id);
 	MesPacket GetPacket(MesType type);
 
@@ -152,7 +157,6 @@ private:
 
 	void ThreadUpdata(void);
 
-	MesPacket revtmx_;
 
 	std::vector<int> layerData;
 

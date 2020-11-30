@@ -1,6 +1,9 @@
 #pragma once
 #include<Dxlib.h>
 #include "../common/Vector2.h"
+#include <iostream>
+#include <utility>
+#include <list>
 #include <string>
 
 enum class NetWorkMode
@@ -26,6 +29,8 @@ enum class ActiveState
 };
 
 
+using ListInt = std::list<std::pair<int, unsigned int>>;
+
 class NetWorkState
 {
 public:
@@ -41,10 +46,7 @@ public:
 
 
     // GESTモードもHOSTモードどちらも使えます
-    void Send(Vector2 pos);                 //データ送る部分
     void SendStanby(bool stanby);
-
-    void Send(std::string file);
 
     Vector2 Recv();                         // データもらう部分
     bool RecvStanby();
@@ -52,7 +54,8 @@ public:
 
 
     int GetHandle();
-
+    int playerID;
+    unsigned int playerMax;
 private:
     virtual bool CheckNetWork() { return false; };
 
@@ -62,6 +65,6 @@ protected:
 
    const int portNum_=8086;
 
-   int netHandle_ = 0;
+   ListInt netHandle_;
 };
 

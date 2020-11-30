@@ -145,7 +145,7 @@ bool NetWork::SendMes(MesType type)
 
 }
 
-bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
+bool NetWork::SendMes(MesType type, MesPacket& mesPacket, int handle)
 {
     MesPacket data;
 
@@ -180,75 +180,71 @@ bool NetWork::SendMes(MesType type, MesPacket& mesPacket)
     }
 
     // もしTYPEはデータなら
-    if (type == MesType::TMX_DATA)
-    {
+    //if (type == MesType::TMX_DATA)
+    //{
 
-        // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
-        if (sendSize >= mesPacket.size())
-        {
-            SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
-            NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
-            return true;
-        }
-        else
-        {
-            do
-            {
-                data.clear();
-                // 1回送信分を初期化する
-                for (auto i = 0; i < sendSize; i++)
-                {
-                    // 1回送信分が残るパゲットのサイズより大きいなら入らない（パゲットのデータがない）
-                    if (mesPacket.size()>i)
-                    {
-                        data.insert(data.end(),mesPacket[i]);
+    //    // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
+    //    if (sendSize >= mesPacket.size())
+    //    {
+    //        SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
+    //        NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        do
+    //        {
+    //            data.clear();
+    //            // 1回送信分を初期化する
+    //            for (auto i = 0; i < sendSize; i++)
+    //            {
+    //                // 1回送信分が残るパゲットのサイズより大きいなら入らない（パゲットのデータがない）
+    //                if (mesPacket.size()>i)
+    //                {
+    //                    data.insert(data.end(),mesPacket[i]);
 
-                    }
-                }
-                // 1回送信分が残るパゲットのサイズより大きいなら、nextがない
-                if (mesPacket.size()<= sendSize)
-                {
-                    header = { type,0, header.mesheader.sendID,static_cast<unsigned int>(data.size()) };
-                }
-                else
-                {
-                    header = { type,1,header.mesheader.sendID,static_cast<unsigned int>(data.size()) };
+    //                }
+    //            }
+    //            // 1回送信分が残るパゲットのサイズより大きいなら、nextがない
+    //            if (mesPacket.size()<= sendSize)
+    //            {
+    //                header = { type,0, header.mesheader.sendID,static_cast<unsigned int>(data.size()) };
+    //            }
+    //            else
+    //            {
+    //                header = { type,1,header.mesheader.sendID,static_cast<unsigned int>(data.size()) };
 
-                }
-                TRACE("TMX_DATA送信\n");
-                TRACE("sendID : %d\n", header.mesheader.sendID);
-                TRACE("データ量 : %d\n", data.size());
+    //            }
+    //            TRACE("TMX_DATA送信\n");
+    //            TRACE("sendID : %d\n", header.mesheader.sendID);
+    //            TRACE("データ量 : %d\n", data.size());
 
-                SetHeader(header, data);
-                header.mesheader.sendID++;
+    //            SetHeader(header, data);
+    //            header.mesheader.sendID++;
 
-                NetWorkSend(state_->GetHandle(), data.data(), data.size() * 4);
+    //            NetWorkSend(state_->GetHandle(), data.data(), data.size() * 4);
 
-                mesPacket.erase(mesPacket.begin(), mesPacket.begin()+ (data.size()-2));
+    //            mesPacket.erase(mesPacket.begin(), mesPacket.begin()+ (data.size()-2));
 
-            } while (mesPacket.size() > 0);
-            end = std::chrono::system_clock::now();
+    //        } while (mesPacket.size() > 0);
+    //        end = std::chrono::system_clock::now();
 
-            TRACE("送信完了\n");
-            return true;
+    //        TRACE("送信完了\n");
+    //        return true;
 
-        }
+    //    }
 
-    }
+    //}
 
     if (type == MesType::POS)
     {
 
-        // 1回送信する大きさが全部パゲットデータより大きい場合（1回送信）
-        //if (sendSize >= mesPacket.size())
-        {
-            //SetHeader(Header{ type,0,1,static_cast<unsigned int>(mesPacket.size()) }, mesPacket);
             SetHeader(Header{ type,0,0,4 }, mesPacket);
 
             NetWorkSend(state_->GetHandle(), mesPacket.data(), mesPacket.size() * 4);
             //TRACE("送信した\n");
             return true;
-        }
+        
 
 
     }    
@@ -309,11 +305,7 @@ void NetWork::GetSetting(const char* setting)
     }
 }
 
-void NetWork::Send(std::string file)
-{
-    NetWorkSend(state_->GetHandle(), &file, sizeof(file));
 
-}
 
 void NetWork::SendStanby(void)//host
 {
@@ -409,126 +401,7 @@ ActiveState NetWork::GetActiv(void)
     return state_->GetActive();
 }
 
-void NetWork::NetRev()
-{
 
-    //if (NetWorkMode::GEST == GetNetWorkMode())
-    //{
-    //    int handle=state_->GetHandle();
-    //    MesHeader revMesHeader_;
-    //    MesPacket revPacket_;
-
-    //    if (sizeof(revMesHeader_) <= GetNetWorkDataLength(handle))
-    //    {
-    //        // 受信
-    //        NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
-
-    //        // TYPEがサイズの場合
-    //        if (revMesHeader_.type == MesType::TMX_SIZE)
-    //        {
-    //            start = std::chrono::system_clock::now();
-    //            // ヘッダーの部分確保する
-    //            revPacket_.resize(revMesHeader_.length);
-    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-    //            // データサイズをとる
-    //            TRACE("TMX_SIZE : %d\n", revMesHeader_.length * 4);
-    //        }
-    //        
-    //        // TYPEがデータの場合
-    //        if (revMesHeader_.type == MesType::TMX_DATA)
-    //        {
-    //            // 最初のパゲットを確保して、とる
-    //            revPacket_.resize(revMesHeader_.length);
-    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);     
-
-    //            do
-    //            {
-    //                // パゲットがない場合新しい情報をとって、確保する
-    //                if (revPacket_.size() == 0)
-    //                {
-    //                    NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
-    //                    revPacket_.resize(revMesHeader_.length);
-    //                    NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-    //                }
-    //                // 確保したデータを後ろに追加する
-    //                for (int i = 0; i < revPacket_.size(); i++)
-    //                {
-    //                    revtmx_.insert(revtmx_.end(), { revPacket_[i] });
-    //                }
-    //                // もし次がある場合、パゲットを消す
-    //                if (revMesHeader_.next !=0)
-    //                {
-    //                    revPacket_.clear();
-    //                }
-    //                // パゲットがない場合、ループする
-    //            } while (revPacket_.size()==0);
-
-    //            end = std::chrono::system_clock::now();
-    //        }
-    //        
-    //        // TYPEがSTANDYの場合
-    //        if (revMesHeader_.type == MesType::STANDY)
-    //        {
-    //            std::lock_guard<std::mutex> lock(mtx);
-
-    //            revStanby_ = true;
-    //            std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-    //            TRACE("時間　：　%d秒\n", s.count());
-    //            state_->SetActive(ActiveState::Stanby);
-    //            TRACE("ホストからのスタンバイもらった\n");
-
-    //        }
-    //        if (revMesHeader_.type == MesType::POS)
-    //        {
-    //            // ヘッダーの部分確保する
-    //            revPacket_.resize(revMesHeader_.length);
-    //            NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-    //            
-    //            VecID_.emplace_back(revPacket_);
-
-    //            //palyerList_.clear();
-    //           // TRACE("posもらった\n");
-
-
-    //        }
-
-    //    }
-    //}
-    //else
-    //{
-    //    int handle = state_->GetHandle();
-    //    MesHeader data;
-    //    MesPacket revPacket_;
-
-    //    if (sizeof(data) <= GetNetWorkDataLength(handle))
-    //    {
-    //        NetWorkRecv(handle, &data, sizeof(data));
-
-    //        if (data.type == MesType::GAME_START)
-    //        {
-    //            end = std::chrono::system_clock::now();
-    //            std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-    //            TRACE("時間　：　%d秒\n", s.count());
-    //            state_->SetActive(ActiveState::Play);
-    //        }
-
-    //        if (data.type == MesType::POS)
-    //        {
-    //            // ヘッダーの部分確保する
-    //            revPacket_.resize(data.length);
-    //            NetWorkRecv(handle, revPacket_.data(), data.length * 4);
-    //           
-    //            palyerList_.push_back(revPacket_);
-    //            VecID_.try_emplace(revPacket_[0].iData);
-    //            VecID_[revPacket_[0].iData].push_back(revPacket_);
-    //            //TRACE("posもらった\n");
-
-    //        }
-
-    //    }
-    //}
-
-}
 
 void NetWork::SetNetWork()
 {
@@ -689,7 +562,6 @@ void NetWork::StartInit()
         }
         else if (GetActiv() == ActiveState::Stanby)
         {
-            NetRev();
 
         }
         else if (GetActiv() == ActiveState::Play)
@@ -705,7 +577,6 @@ void NetWork::StartInit()
 
         if (GetActiv() == ActiveState::Init)
         {
-            NetRev();
 
         }
         if (GetActiv() == ActiveState::Stanby)
@@ -746,6 +617,11 @@ void NetWork::Play()
 UpdataMode NetWork::GetMode()
 {
     return mode_;
+}
+
+int NetWork::GetHandle()
+{
+    return state_->GetHandle();
 }
 
 MesPacket NetWork::GetPacket(int id)
@@ -827,6 +703,40 @@ void NetWork::EraserPac()
 
 void NetWork::RevInit()
 {
+    revFunc_.try_emplace(MesType::COUNT_DOWN, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        //TypePacket_[0].
+        TRACE("COUNT_DOWNゲット\n");
+        });
+
+    revFunc_.try_emplace(MesType::ID, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        //TypePacket_[0].
+        TRACE("ID : %d , 数 : %d\n", revPacket_[0].iData, revPacket_[1].iData);
+        });
+
+    revFunc_.try_emplace(MesType::START_TIME, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        TRACE("開始時間\n");
+        });
 
 
     revFunc_.try_emplace(MesType::TMX_SIZE, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
@@ -835,10 +745,31 @@ void NetWork::RevInit()
         // ヘッダーの部分確保する
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
-        // データサイズをとる
-        TRACE("TMX_SIZE : %d\n", revMesHeader_.length * 4);
 
-        
+        //do
+        //{
+        //    // パゲットがない場合新しい情報をとって、確保する
+        //    if (revPacket_.size() == 0)
+        //    {
+        //        NetWorkRecv(handle, &revMesHeader_, sizeof(revMesHeader_));
+        //        revPacket_.resize(revMesHeader_.length);
+        //        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+        //    }
+        //    // 確保したデータを後ろに追加する
+        //    for (int i = 0; i < revPacket_.size(); i++)
+        //    {
+        //        revtmx_.insert(revtmx_.end(), { revPacket_[i] });
+        //    }
+        //    // もし次がある場合、パゲットを消す
+        //    if (revMesHeader_.next != 0)
+        //    {
+        //        revPacket_.clear();
+        //    }
+        //    // パゲットがない場合、ループする
+        //} while (revPacket_.size() == 0);
+
+        //TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+        TRACE("TMX ゲット\n");
         
         });
     revFunc_.try_emplace(MesType::TMX_DATA, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
@@ -880,8 +811,8 @@ void NetWork::RevInit()
         std::lock_guard<std::mutex> lock(mtx);
 
         revStanby_ = true;
-        std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-        TRACE("時間　：　%d秒\n", s.count());
+        //std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
+        //TRACE("時間　：　%d秒\n", s.count());
         state_->SetActive(ActiveState::Stanby);
         TRACE("ホストからのスタンバイもらった\n");
 
@@ -892,8 +823,8 @@ void NetWork::RevInit()
     revFunc_.try_emplace(MesType::GAME_START, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
 
         end = std::chrono::system_clock::now();
-        std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
-        TRACE("時間　：　%d秒\n", s.count());
+        //std::chrono::milliseconds s = std::chrono::duration_cast<std::chrono::milliseconds>((end - start));
+        //TRACE("時間　：　%d秒\n", s.count());
         state_->SetActive(ActiveState::Play);
 
 
@@ -906,7 +837,7 @@ void NetWork::RevInit()
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
-        VecID_.emplace_back(revPacket_);
+       VecID_.emplace_back(revPacket_);
 
 
 
@@ -933,6 +864,17 @@ void NetWork::RevInit()
 
         //TypePacket_[0].
         TRACE("TEST");
+        });
+
+    revFunc_.try_emplace(MesType::LOST, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
+
+        // ヘッダーの部分確保する
+        revPacket_.resize(revMesHeader_.length);
+        NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+
+        TRACE("開始時間\n");
         });
 
 }
