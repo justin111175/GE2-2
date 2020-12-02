@@ -42,6 +42,7 @@ public:
 
 	Vector2 GetPos();
 	bool GetAlive();
+	bool SetAlive(bool);
 	bool GetIsDeath();
 	bool SetIsDeath(bool);
 	int GetID();

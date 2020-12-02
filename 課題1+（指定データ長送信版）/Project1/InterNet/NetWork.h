@@ -24,11 +24,11 @@ enum class UpdataMode
 enum class MesType:unsigned char
 {
 	NON=100,
-	COUNT_DOWN,						// 接続受付カントダウン
+	COUNT_DOWN_ROOM,						// 接続受付カントダウン
 	ID,								// 自分のIDとプレイヤーの数
-	STANDY,							// 初期化情報送信完了（ホスト用）
-	GAME_START,						// ホストからの初期化情報での初期化完了
-	START_TIME,						// 全員の初期化完了後ゲーム開始時間
+	STANDY_HOST,							// 初期化情報送信完了（ホスト用）
+	STANDY_GEST,						// ホストからの初期化情報での初期化完了
+	COUNT_DOWN_GAME,						// 全員の初期化完了後ゲーム開始時間
 	TMX_SIZE,
 	TMX_DATA,						// 
 	POS,							// ゲーム中データ
@@ -68,6 +68,7 @@ union UnionTime
 
 };
 
+
 using MesPacket = std::vector<UnionData>;
 
 using RevPacket = std::pair<MesType, MesPacket>;
@@ -91,14 +92,17 @@ public:
 
 	bool RevTmx(std::string);
 
-	bool SendMes(MesType type);
-	bool SendMes(MesType type, MesPacket& mesPacket,int handle);
+
+	bool SendMesAll(MesType type);
+	bool SendMesAll(MesType type, MesPacket& mesPacket,int);
+
+	ListInt GetHandleAll();
 
 	void GetSetting(const char* setting);
 
 
-	void SendStanby(void);
-	void SendStart();
+
+
 	bool GetRevStanby();
 
 	bool SetNetWorkMode(NetWorkMode mode);
@@ -109,43 +113,47 @@ public:
 	IPDATA GetIp(void);
 
 	ActiveState GetActiv(void);
-
+	bool SetActive(ActiveState active);
 
 	bool revStanby_;
 	
-	std::unique_ptr<TmxObj> tmx_;
 
-	std::thread updata_;
-	
-	void SetNetWork();
-	void GetHostIp();
-	void StartInit();
-	void Play();
 
 	UpdataMode GetMode();
 	
-	std::chrono::system_clock::time_point  start, end;
-	
+	std::chrono::system_clock::time_point  start, end,sendTime_;
+	int time_;
+	std::unique_ptr<TmxObj> tmx_;
+
 	unsigned int intSendCount_;
 	int dir_;
 	Vector2 pos_;
-	std::vector<MesPacket> VecID_;
-	std::vector<RevPacket> TypePacket_;
+	std::list<MesPacket> VecID_;
+	std::list<RevPacket> TypePacket_;
 
-	std::list<MesPacket> palyerList_;
-
-
-	MesPacket posPacket_;
 	MesPacket revtmx_;
 
 	int GetHandle();
 
 	MesPacket GetPacket(int id);
-	MesPacket GetPacket(MesType type);
+	MesPacket GetNewPacket(MesType type);
+	void GetSavePacket(MesType type);
+
+
+	std::map<MesType, std::list<MesPacket>> saveData_;
 
 	void EraserPac();
+	bool countFlag_;
+	
+
 private:
+	
 	std::map<MesType, std::function<void(int, MesHeader&, MesPacket&)>> revFunc_;
+	
+	std::unique_ptr<NetWorkState> state_;
+	
+	std::thread updata_;
+
 
 	void RevInit();
 
@@ -157,12 +165,7 @@ private:
 
 	void ThreadUpdata(void);
 
-
 	std::vector<int> layerData;
-
-	std::unique_ptr<NetWorkState> state_;
-
-	MesHeader mesData_;
 
 	int retest = 0;
 

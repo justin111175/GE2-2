@@ -44,13 +44,6 @@ void NetWorkState::SendStanby(bool stanby)
 
 
 
-Vector2 NetWorkState::Recv()
-{
-	Vector2 pos;
-	//NetWorkRecv(netHandle_.front().first, &pos, sizeof(pos));
-	return pos;
-}
-
 bool NetWorkState::RecvStanby()
 {
 	bool ready;
@@ -74,8 +67,19 @@ bool NetWorkState::Updata(void)
 
 int NetWorkState::GetHandle()
 {
-	auto data = netHandle_.front().first;
-	return data;
+	int data;
+	if (netHandle_.size())
+	{
+		data = netHandle_.front().first;
+		return data;
+
+	}
+	return -1;
+}
+
+ListInt NetWorkState::GetHandleAll()
+{
+	return netHandle_;
 }
 
 

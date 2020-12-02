@@ -48,14 +48,15 @@ public:
     // GESTモードもHOSTモードどちらも使えます
     void SendStanby(bool stanby);
 
-    Vector2 Recv();                         // データもらう部分
     bool RecvStanby();
     bool Updata(void);
 
 
     int GetHandle();
+    ListInt GetHandleAll();
     int playerID;
     unsigned int playerMax;
+
 private:
     virtual bool CheckNetWork() { return false; };
 

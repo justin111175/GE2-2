@@ -20,6 +20,12 @@ bool Obj::GetAlive()
 
 }
 
+bool Obj::SetAlive(bool flag)
+{
+	isAlive = flag;
+	return true;
+}
+
 bool Obj::GetIsDeath()
 {
 	return isDeath;

@@ -46,6 +46,7 @@ public:
 	static int fallCnt_;
 
 	bool MapCheck(int no);
+	void GetDeathID();
 private:
 
 	playerType playerType_;
@@ -58,7 +59,6 @@ private:
 	std::vector<int*> mapData_;
 
 	std::list<int> bombList_;
-
 
 	std::list<std::function<bool(CntData,bool)>> InputList_;
 

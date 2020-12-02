@@ -30,8 +30,12 @@ private:
 
 	void GetPlayerPac();
 	void GetStartTime();
+	void GetDeathID();
 	void EraserLost();
 	int lostID_;
+
+	std::list<int> deathID_;
+
 	std::pair<int, int> playerPac_;
 
 	std::list<unique_Obj> objList_;

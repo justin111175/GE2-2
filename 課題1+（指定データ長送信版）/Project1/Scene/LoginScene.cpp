@@ -2,13 +2,32 @@
 #include"Transition.h"
 #include <ctype.h> 
 #include "../common/_debug/_DebugConOut.h"
-
+#include "../common/_debug/_DebugDispOut.h"
 #include <fstream>
 #include <sstream>
 #include "SceneMng.h"
 
 unique_Base LoginScene::Update(unique_Base own)
 {
+	Draw();
+
+	GetCount_Down();
+
+
+
+	if (!IpNetwork.countFlag_)
+	{
+		_dbgDrawFormatString(200, 600, 0xFFFFFF, "待機状態");
+
+	}
+	else
+	{
+		_dbgDrawFormatString(200, 600, 0xFFFFFF, "開始まで　：　%d秒", IpNetwork.time_);
+
+	}
+	
+
+
 	func_[mode_]();
 
 
@@ -18,7 +37,6 @@ unique_Base LoginScene::Update(unique_Base own)
 
 	}
 
-	Draw();
 
 
 	return std::move(own);
@@ -87,14 +105,14 @@ LoginScene::~LoginScene()
 void LoginScene::GetCount_Down()
 {
 	MesPacket data_;
-	data_ = IpNetwork.GetPacket(MesType::COUNT_DOWN);
-	UnionTime time = { std::chrono::system_clock::now() };
+	data_ = IpNetwork.GetNewPacket(MesType::COUNT_DOWN_ROOM);
 
 	if (data_.size())
-	{
+	{	
+		UnionTime time = { std::chrono::system_clock::now() };
 		time.iData[0] = data_[0].iData;
 		time.iData[1] = data_[1].iData;
-
+		IpNetwork.start = time.start_+ std::chrono::milliseconds(15000);
 	}
 
 
@@ -105,7 +123,7 @@ void LoginScene::GetTmx()
 {
 
 	MesPacket data_;
-	data_ = IpNetwork.GetPacket(MesType::TMX_SIZE);
+	data_ = IpNetwork.GetNewPacket(MesType::TMX_SIZE);
 	if (data_.size())
 	{
 		for (int i = 0; i < data_.size(); i++)
@@ -133,6 +151,8 @@ void LoginScene::GetTmx()
 
 	//}
 }
+
+
 
 
 
@@ -304,27 +324,64 @@ void LoginScene::StartInit()
 
 	if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
+
 		if (IpNetwork.GetActiv() == ActiveState::Init)
 		{
-			IpNetwork.start = std::chrono::system_clock::now();
+			MesPacket data;
+			UnionData uniondata_;
 
-			IpNetwork.tmx_->SendTmx();
+			for (auto handle : IpNetwork.GetHandleAll())
+			{
+				uniondata_.iData = handle.second * 5;
+				data.insert(data.end(), uniondata_);
 
-			IpNetwork.SendStanby();
+				uniondata_.iData = IpNetwork.GetHandleAll().size() + 1;
+				data.insert(data.end(), uniondata_);
+				
+				IpNetwork.SendMesAll(MesType::ID,data,handle.first);
+
+
+
+			}
+
+			IpNetwork.tmx_->SendTmxSize();
+
+			IpNetwork.tmx_->SendTmxData();
+
+			IpNetwork.SendMesAll(MesType::STANDY_HOST);
 
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Stanby)
 		{
 			IpNetwork.Updata();
-
-			//TRACE("test");
 		}
 		else if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
+
 			IpNetwork.tmx_->LoadTmx("map/ObjTest.tmx");
 
 			TRACE("プレイモードに行く\n");
 			mode_ = UpdataMode::Play;
+
+
+			UnionTime time_ = { std::chrono::system_clock::now() };
+			MesPacket data_;
+
+			UnionData unionD;
+
+			unionD.iData = time_.iData[0];
+			data_.insert(data_.end(), unionD);
+			unionD.iData = time_.iData[1];
+			data_.insert(data_.end(), unionD);
+
+			IpNetwork.TypePacket_.emplace_back(MesType::COUNT_DOWN_GAME, data_);
+
+			for (auto handle : IpNetwork.GetHandleAll())
+			{
+				IpNetwork.SendMesAll(MesType::COUNT_DOWN_GAME, data_, handle.first);
+
+			}
+
 		}
 	}
 	else
@@ -340,7 +397,7 @@ void LoginScene::StartInit()
 			if (IpNetwork.revStanby_)
 			{
 				IpNetwork.RevTmx("map/test.tmx");
-				IpNetwork.SendStart();
+				IpNetwork.SendMesAll(MesType::STANDY_GEST);
 			}
 
 
@@ -405,25 +462,9 @@ void LoginScene::DrawOwn()
 		DrawString(300, 320 + static_cast<int>(i.first) * 50, i.second, 0xffffff, true);
 
 	}
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 230);
-	//SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
-	
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, sin((double)IpSceneMng.frames()/10)*255);
-	//if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
-	//{
-	//	if (mode_ != UpdataMode::SetNetWork)
-	//	{
-	//		if (!IpNetwork.Updata())
-	//		{
-	//			DrawBox(300, 300 , 660, 450, 0x000000, true);
-	//			DrawBoxAA(300, 300 , 660, 450, 0xFFFFFF, false);
-	//			DrawString(340, 350, "ゲスト接続待ち待機", 0xFFFFFF, true);
 
-	//		}
 
-	//	}
 
-	//}
 
 
 

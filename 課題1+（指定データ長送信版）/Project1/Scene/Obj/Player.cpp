@@ -97,24 +97,11 @@ void Player::Update(void)
 	mapData_ = IpNetwork.tmx_->pairMap_["3"].second;
 	Vector2 tmpPos = pos_ / 32;
 	
-	MesPacket data_ = IpNetwork.GetPacket(MesType::DEATH);
 
 
 	if (isAlive)
 	{
-
-
-
-
-		if (data_.size())
-		{
-			if (id_ == data_[0].iData)
-			{
-				runCnt_ = 0;
-				isAlive = false;
-			}
-		}
-
+		GetDeathID();
 
 		switch (playerType_)
 		{
@@ -344,7 +331,12 @@ void Player::SendPos()
 	unionD.iData = static_cast<int>(dir_);
 	data.insert(data.end(), unionD);
 
-	IpNetwork.SendMes(MesType::POS, data,IpNetwork.GetHandle());
+	for (auto handle : IpNetwork.GetHandleAll())
+	{
+		IpNetwork.SendMesAll(MesType::POS, data, handle.first);
+
+	}
+	//IpNetwork.SendMes(MesType::POS, data,IpNetwork.GetHandle());
 
 }
 
@@ -357,9 +349,13 @@ void Player::SendDeath()
 	unionD.iData = id_;
 	data.insert(data.end(), unionD);
 
+	for (auto handle : IpNetwork.GetHandleAll())
+	{
+		IpNetwork.SendMesAll(MesType::DEATH, data, handle.first);
 
+	}
 
-	IpNetwork.SendMes(MesType::DEATH, data, IpNetwork.GetHandle());
+	//IpNetwork.SendMes(MesType::DEATH, data, IpNetwork.GetHandle());
 
 
 }
@@ -772,6 +768,27 @@ bool Player::MapCheck(int no)
 	}
 
 	return true;
+
+}
+
+void Player::GetDeathID()
+{
+
+	MesPacket data_ = IpNetwork.GetNewPacket(MesType::DEATH);
+
+	if (data_.size())
+	{
+		if (id_ == data_[0].iData)
+		{
+			runCnt_ = 0;
+			isAlive = false;
+		}
+	}
+
+
+
+
+
 
 }
 

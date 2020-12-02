@@ -9,4 +9,5 @@ public:
     virtual ~HostState();
     NetWorkMode GetMode(void) { return NetWorkMode::HOST; };
     bool CheckNetWork()override;
+    int cnt_;
 };

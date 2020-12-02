@@ -36,6 +36,7 @@ private:
 	void B_GEST();
 
 	std::map<UpdataMode, std::function<void(void)>> func_;
+	std::chrono::system_clock::time_point end_, start_time_;
 
 	void SetNetWork();
 	void GetHostIp();

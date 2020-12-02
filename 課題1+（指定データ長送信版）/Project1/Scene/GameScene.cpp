@@ -33,7 +33,7 @@ void GameScene::DrawOwn()
 void GameScene::GetPlayerPac()
 {
 	MesPacket data_;
-	data_ = IpNetwork.GetPacket(MesType::ID);
+	data_ = IpNetwork.GetNewPacket(MesType::ID);
 
 	if (data_.size())
 	{
@@ -47,7 +47,7 @@ void GameScene::GetStartTime()
 {
 
 	MesPacket data_;
-	data_ = IpNetwork.GetPacket(MesType::START_TIME);
+	data_ = IpNetwork.GetNewPacket(MesType::COUNT_DOWN_GAME);
 	UnionTime time_ = { std::chrono::system_clock::now() };
 
 	if (data_.size())
@@ -62,25 +62,65 @@ void GameScene::GetStartTime()
 
 }
 
-void GameScene::EraserLost()
+void GameScene::GetDeathID()
 {
 	MesPacket data_;
-	data_ = IpNetwork.GetPacket(MesType::LOST);
+	IpNetwork.GetSavePacket(MesType::DEATH);
 
-	if (data_.size())
+	if (IpNetwork.saveData_[MesType::DEATH].size())
 	{
-		lostID_ = data_[0].iData;
+		data_ = IpNetwork.saveData_[MesType::DEATH].front();
 
-		auto itr = std::remove_if(objList_.begin(), objList_.end(), [&](unique_Obj& obj) {return obj->GetID() == lostID_; });
+
+		deathID_.emplace_back(data_[0].iData);
+
+		IpNetwork.saveData_[MesType::DEATH].pop_front();
+	}
+
+	if (deathID_.size())
+	{
+		int id = deathID_.front();
+		auto itr = std::remove_if(objList_.begin(), objList_.end(), [&](unique_Obj& obj) {return obj->GetID() == id; });
 
 		if (itr != objList_.end())
 		{
-			objList_.erase(itr, objList_.end());
+			(*itr)->SetAlive(false);
 		}
+		deathID_.pop_front();
 
+		//for (auto& data : deathID_)
+		//{
+		//	if (data == id_)
+		//	{
+		//		runCnt_ = 0;
+		//		isAlive = false;
+		//	}
+		//}
 	}
 
 
+}
+
+void GameScene::EraserLost()
+{
+
+
+	MesPacket data_;
+	IpNetwork.GetSavePacket(MesType::LOST);
+
+	if (IpNetwork.saveData_[MesType::LOST].size())
+	{
+		data_ = IpNetwork.saveData_[MesType::LOST].front();
+		lostID_ = data_[0].iData;
+
+			auto itr = std::remove_if(objList_.begin(), objList_.end(), [&](unique_Obj& obj) {return obj->GetID() == lostID_; });
+
+			if (itr != objList_.end())
+			{
+				objList_.erase(itr, objList_.end());
+			}
+		IpNetwork.saveData_[MesType::SET_BOMB].pop_front();
+	}
 
 
 
@@ -118,7 +158,11 @@ void GameScene::SetBomb(int ownID, int selfID, Vector2 pos, int lengh, std::chro
 
 	if (sendFlag)
 	{
-		IpNetwork.SendMes(MesType::SET_BOMB, data, IpNetwork.GetHandle());
+		for (auto handle : IpNetwork.GetHandleAll())
+		{
+			IpNetwork.SendMesAll(MesType::SET_BOMB, data, handle.first);
+
+		}
 
 	}
 
@@ -164,16 +208,19 @@ void GameScene::RevBomb()
 {
 
 	MesPacket data_;
-	data_=IpNetwork.GetPacket(MesType::SET_BOMB);
-	UnionTime time = { std::chrono::system_clock::now() };
+	IpNetwork.GetSavePacket(MesType::SET_BOMB);
 
-	if (data_.size())
+	UnionTime time = { std::chrono::system_clock::now() };
+	if (IpNetwork.saveData_[MesType::SET_BOMB].size())
 	{
+		data_ = IpNetwork.saveData_[MesType::SET_BOMB].front();
 		time.iData[0] = data_[5].iData;
 		time.iData[1] = data_[6].iData;
 
-		SetBomb(data_[0].iData, data_[1].iData, { data_[2].iData,data_[3].iData }, data_[4].iData, time.start_,false);
+		SetBomb(data_[0].iData, data_[1].iData, { data_[2].iData,data_[3].iData }, data_[4].iData, time.start_, false);
+		IpNetwork.saveData_[MesType::SET_BOMB].pop_front();
 	}
+
 
 
 	
@@ -188,21 +235,18 @@ unique_Base GameScene::Update(unique_Base own)
 
 	GetStartTime();
 
-
-
-
-
 	end_ = std::chrono::system_clock::now();
 	auto time = std::chrono::duration_cast<std::chrono::milliseconds>(start_time_ - end_).count() / 1000;
-	_dbgDrawFormatString(0, 700, 0xFFFFFF, "開始時間 : %d", time);
 
 	IpNetwork.EraserPac();
 	DeathEraser();
 	EraserLost();
-
+	GetDeathID();
+	_dbgDrawFormatString(0, 700, 0xFFFFFF, "開始時間 : %d", time);
 
 	if (time > 0)
-	{
+	{	
+
 		return own;
 
 	}
@@ -252,8 +296,18 @@ GameScene::GameScene()
 		IpNetwork.tmx_->LoadTmx("map/ObjTest.tmx");
 
 	}
+	if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
+	{
+		GetPlayerPac();
 
-	GetPlayerPac();
+	}
+	else
+	{
+		playerPac_.first = 0;
+		playerPac_.second = IpNetwork.GetHandleAll().size()+1;
+
+	}
+
 	GetStartTime();
 
 

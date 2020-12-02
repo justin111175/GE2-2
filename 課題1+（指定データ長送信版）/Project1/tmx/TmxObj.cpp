@@ -165,7 +165,7 @@ void TmxObj::Draw()
 
 
 
-void TmxObj::SendTmx()//host
+void TmxObj::SendTmxData()//host
 {
 
 	std::ifstream ifp("map/ObjTest.tmx");
@@ -219,12 +219,10 @@ void TmxObj::SendTmx()//host
 						{
 							
 							unionD.cData[tmpcnt] = atoi(string.c_str());
-							//std::cout << atoi(string.c_str()) ;
 						}
 						else
 						{
 							unionD.cData[tmpcnt] += atoi(string.c_str()) << 4;
-							//std::cout << atoi(string.c_str());
 						}
 
 						if (cnt != 7)
@@ -267,53 +265,39 @@ void TmxObj::SendTmx()//host
 
 	}
 	int count = 0;
-	//IpNetwork.SendMes(MesType::TMX_SIZE,data);
-	//IpNetwork.SendMes(MesType::TMX_DATA,data);
+
+
+
+
+
+	for (auto handle : IpNetwork.GetHandleAll())
+	{
+		IpNetwork.SendMesAll(MesType::TMX_DATA,data, handle.first);
+	}
+
 
 
 }
 
-//VecMap TmxObj::GetMap()
-//{
-//
-//	pairMap_.resize(layer_.size());
-//	for (int i = 0; i < layer_.size(); i++)
-//	{
-//		pairMap_[i].first.resize((__int64)21 * 17);
-//		for (size_t no = 0; no < 17; no++)
-//		{
-//			pairMap_[i].second.emplace_back(&pairMap_[i].first[no * 21]);
-//		}
-//
-//
-//	}
-//
-//
-//
-//	for (int i = 0; i < layer_["1"].size(); i++)
-//	{
-//		pairMap_[0].first[i] = layer_["1"][i];
-//
-//	}
-//	for (int i = 0; i < layer_["2"].size(); i++)
-//	{
-//		pairMap_[1].first[i] = layer_["2"][i];
-//
-//	}
-//	for (int i = 0; i < layer_["3"].size(); i++)
-//	{
-//		pairMap_[2].first[i] =layer_["3"][i];
-//
-//	}
-//	for (int i = 0; i <layer_["4"].size(); i++)
-//	{
-//		pairMap_[3].first[i] = layer_["4"][i];
-//
-//	}
-//
-//	return pairMap_;
-//	
-//}
+void TmxObj::SendTmxSize()
+{
+	MesPacket data;
+	UnionData uniondata_;
+
+
+	uniondata_.cData[0] = 21;
+	uniondata_.cData[1] = 17;
+	uniondata_.cData[2] = 4;
+
+	data.insert(data.end(), { uniondata_ });
+
+	for (auto handle : IpNetwork.GetHandleAll())
+	{
+		IpNetwork.SendMesAll(MesType::TMX_SIZE, data, handle.first);
+	}
+}
+
+
 
 std::vector<int> TmxObj::StringChange(std::string string)
 {
