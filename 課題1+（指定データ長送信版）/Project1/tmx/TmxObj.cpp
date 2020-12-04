@@ -153,10 +153,10 @@ void TmxObj::Draw()
 					DrawGraph(tileset.tileWidth * x, tileset.tileHeight * y, IMAGE_ID("map")[pairMap_[data.first].second[y][x]-1], true);
 				}
 
-				//if (checkMap_[y][x] == false)
-				{
-					//_dbgDrawFormatString(tileset.tileWidth * x, tileset.tileHeight * y, 0xFFFFFF, "%d", checkMap_[y][x]);
-				}
+				//if (checkMap_[y][x] == 1)
+				//{
+				//	_dbgDrawFormatString(tileset.tileWidth * x, tileset.tileHeight * y, 0xFFFFFF, "%d", checkMap_[y][x]);
+				//}
 			}
 		}
 
@@ -168,7 +168,7 @@ void TmxObj::Draw()
 void TmxObj::SendTmxData()//host
 {
 
-	std::ifstream ifp("map/ObjTest.tmx");
+	std::ifstream ifp("map/testMap.tmx");
 
 
 	UnionData unionD;
@@ -270,9 +270,9 @@ void TmxObj::SendTmxData()//host
 
 
 
-	for (auto handle : IpNetwork.GetHandleAll())
+	//for (auto handle : IpNetwork.GetHandleAll())
 	{
-		IpNetwork.SendMesAll(MesType::TMX_DATA,data, handle.first);
+		IpNetwork.SendMesAll(MesType::TMX_DATA,data);
 	}
 
 
@@ -281,19 +281,11 @@ void TmxObj::SendTmxData()//host
 
 void TmxObj::SendTmxSize()
 {
-	MesPacket data;
-	UnionData uniondata_;
 
 
-	uniondata_.cData[0] = 21;
-	uniondata_.cData[1] = 17;
-	uniondata_.cData[2] = 4;
-
-	data.insert(data.end(), { uniondata_ });
-
-	for (auto handle : IpNetwork.GetHandleAll())
+	//for (auto handle : IpNetwork.GetHandleAll())
 	{
-		IpNetwork.SendMesAll(MesType::TMX_SIZE, data, handle.first);
+		IpNetwork.SendMesAll(MesType::TMX_SIZE);
 	}
 }
 

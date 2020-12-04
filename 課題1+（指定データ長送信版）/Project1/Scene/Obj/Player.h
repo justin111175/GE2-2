@@ -47,8 +47,11 @@ public:
 
 	bool MapCheck(int no);
 	void GetDeathID();
+	bool DeathCheck();
+	void CheckPosUpdata(Vector2);
 private:
 
+	std::vector<Vector2> checkPos_;
 	playerType playerType_;
 	Vector2 speed_;
 

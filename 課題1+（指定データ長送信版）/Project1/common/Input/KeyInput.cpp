@@ -18,7 +18,7 @@ bool KeyInput::SetUp(void)
 			{InputID::Btn1,KEY_INPUT_SPACE},
 			{InputID::Btn2,KEY_INPUT_V},
 			{InputID::Btn3,KEY_INPUT_B},
-			{InputID::Mean,KEY_INPUT_ESCAPE}
+			{InputID::ESC,KEY_INPUT_ESCAPE}
 		};
 
 

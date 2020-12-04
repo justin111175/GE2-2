@@ -94,6 +94,8 @@ public:
 
 
 	bool SendMesAll(MesType type);
+	bool SendMesAll(MesType type, MesPacket& mesPacket);
+
 	bool SendMesAll(MesType type, MesPacket& mesPacket,int);
 
 	ListInt GetHandleAll();
@@ -134,6 +136,7 @@ public:
 	MesPacket revtmx_;
 
 	int GetHandle();
+
 
 	MesPacket GetPacket(int id);
 	MesPacket GetNewPacket(MesType type);

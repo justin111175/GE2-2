@@ -22,7 +22,7 @@ void SceneMng::Run(void)
 
 	Scene_ = std::make_unique<TitleScene>();
 
-	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
+	while (ProcessMessage() == 0 )
 	{
 		_dbgStartDraw();
 

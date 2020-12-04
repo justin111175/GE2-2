@@ -10,7 +10,7 @@ enum class InputID
 	Btn1,
 	Btn2,
 	Btn3,
-	Mean,
+	ESC,
 	テスト用,
 	Max
 };

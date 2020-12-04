@@ -10,10 +10,15 @@ int Player::fallCnt_ = 0;
 
 Player::Player(Vector2 pos, int id, BaseScene& scene,int playerID)
 	:scene_(scene)
-{
+{	
+	pos_ = { 32 * pos.x, 32 * pos.y };
+
 	if (id == playerID)
 	{
 		playerType_ = playerType::Ž©•ª;
+
+
+
 	}
 	else
 	{
@@ -22,7 +27,6 @@ Player::Player(Vector2 pos, int id, BaseScene& scene,int playerID)
 
 
 
-	pos_ = { 32 * pos.x, 32 * pos.y };
 
 	IpImageMng.GetID("Play", "image/bomberman.png", { 32,205 / 4 }, { 5,4 });
 	dir_ = DIR::Right;
@@ -48,9 +52,6 @@ Player::Player(Vector2 pos, int id, BaseScene& scene,int playerID)
 	animePlayer_[DIR::Up].emplace_back(13);
 	animePlayer_[DIR::Up].emplace_back(8);
 	animePlayer_[DIR::Up].emplace_back(18);
-
-
-
 
 	animePlayer_.try_emplace(DIR::Right);
 	animePlayer_[DIR::Right].emplace_back(7);
@@ -92,12 +93,9 @@ Player::~Player()
 void Player::Update(void)
 {
 
-
 	mapDataBase_ = IpNetwork.tmx_->pairMap_["3"].first;
 	mapData_ = IpNetwork.tmx_->pairMap_["3"].second;
 	Vector2 tmpPos = pos_ / 32;
-	
-
 
 	if (isAlive)
 	{
@@ -106,15 +104,19 @@ void Player::Update(void)
 		switch (playerType_)
 		{
 		case playerType::Ž©•ª:
-			if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
+
+			if (DeathCheck())
 			{
 				SendDeath();
 				runCnt_ = 0;
 
 				isAlive = false;
-			}
-			UpdateDef(conType::Key);
 
+			}
+			
+
+			UpdateDef(conType::Key);
+			CheckPosUpdata(pos_);
 			break;
 		case playerType::‘ŠŽè:
 			RevData();
@@ -123,90 +125,14 @@ void Player::Update(void)
 		default:
 			break;
 		}
-		//if (IpNetwork.GetNetWorkMode() == NetWorkMode::HOST)
-		//{
 
-		//	if (id_ != 5)
-		//	{
-
-		//		if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-		//		{
-		//			SendDeath();
-		//			runCnt_ = 0;
-
-		//			isAlive = false;
-		//		}
-
-		//		if (id_ == 0)
-		//		{
-		//			if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-		//			{
-		//				runCnt_ = 0;
-		//				isAlive = false;
-		//			}
-		//			UpdateDef(conType::Key);
-
-		//		}
-		//		else
-		//		{
-		//			UpdateAuto();
-		//		}
-		//	}
-		//}
-		//else if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
-		//{
-		//	if (id_ != 0)
-		//	{
-
-		//		if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-		//		{
-		//			SendDeath();
-		//			runCnt_ = 0;
-
-		//			isAlive = false;
-		//		}
-
-		//		if (id_ == 5)
-		//		{
-
-		//			UpdateDef(conType::Key);
-		//		}
-		//		else
-		//		{
-		//			UpdateAuto();
-
-		//		}
-		//	}
-		//}
-		//else if(IpNetwork.GetNetWorkMode() == NetWorkMode::OFFLINE)
-		//{
-		//	if (IpNetwork.tmx_->checkMap_[tmpPos.y][tmpPos.x] == 1)
-		//	{
-		//		SendDeath();
-		//		runCnt_ = 0;
-		//		isAlive = false;
-		//	}
-		//	if (id_ == 0)
-		//	{
-		//		UpdateDef(conType::Key);
-
-		//	}
-		//	else
-		//	{
-		//		UpdateAuto();
-		//	}
-		//}
+		SendPos();
 	}
 	else
 	{
-
-
-
 		end_ = std::chrono::system_clock::now();
-
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(1000/2).count())
 		{
-
 			start_ = std::chrono::system_clock::now();
 			runCnt_++;
 			if (runCnt_ >= 4)
@@ -242,7 +168,6 @@ void Player::UpdateDef(conType input)
 	}
 	
 
-	SendPos();
 
 
 
@@ -287,9 +212,6 @@ void Player::UpdateAuto(void)
 void Player::UpdateNet(void)
 {
 
-
-
-
 }
 
 void Player::Draw(void)
@@ -300,6 +222,11 @@ void Player::Draw(void)
 		_dbgDrawBox(pos_.x, pos_.y, pos_.x + 32 , pos_.y + 32 , 0xFFFFF, false);
 	}
 	_dbgDrawFormatString(pos_.x, pos_.y, 0xFFFFFF, "%d", id_);
+
+	for (int i = 0; i < checkPos_.size(); i++)
+	{
+		DrawCircle(checkPos_[i].x, checkPos_[i].y, 2, 0xFFFFFF, 0x000000);
+	}
 
 	if (isAlive)
 	{
@@ -331,12 +258,9 @@ void Player::SendPos()
 	unionD.iData = static_cast<int>(dir_);
 	data.insert(data.end(), unionD);
 
-	for (auto handle : IpNetwork.GetHandleAll())
-	{
-		IpNetwork.SendMesAll(MesType::POS, data, handle.first);
 
-	}
-	//IpNetwork.SendMes(MesType::POS, data,IpNetwork.GetHandle());
+	IpNetwork.SendMesAll(MesType::POS, data);
+
 
 }
 
@@ -349,14 +273,8 @@ void Player::SendDeath()
 	unionD.iData = id_;
 	data.insert(data.end(), unionD);
 
-	for (auto handle : IpNetwork.GetHandleAll())
-	{
-		IpNetwork.SendMesAll(MesType::DEATH, data, handle.first);
 
-	}
-
-	//IpNetwork.SendMes(MesType::DEATH, data, IpNetwork.GetHandle());
-
+	IpNetwork.SendMesAll(MesType::DEATH, data);
 
 }
 
@@ -711,7 +629,7 @@ void Player::InputInit()
 			{
 				if (cnt_ - 1 < 4)
 				{
-					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_,6, std::chrono::system_clock::now(), true);
+					dynamic_cast<GameScene&>(scene_).SetBomb(id_, id_ + 1, pos_,4, std::chrono::system_clock::now(), true);
 
 				}
 
@@ -789,6 +707,37 @@ void Player::GetDeathID()
 
 
 
+
+}
+
+bool Player::DeathCheck()
+{
+	for (int i = 0; i < checkPos_.size(); i++)
+	{
+		if (IpNetwork.tmx_->checkMap_[checkPos_[i].y/32][checkPos_[i].x/32] == 1)
+		{
+			return true;
+		}
+	}
+
+
+
+
+
+	return false;
+}
+
+void Player::CheckPosUpdata(Vector2 pos)
+{
+	checkPos_.clear();
+	checkPos_.emplace_back(pos);
+	checkPos_.emplace_back((pos + Vector2{ 16,0 }));
+	checkPos_.emplace_back((pos + Vector2{ 32,0 }));
+	checkPos_.emplace_back((pos + Vector2{ 32,16 }));
+	checkPos_.emplace_back((pos + Vector2{ 32,32 }));
+	checkPos_.emplace_back((pos + Vector2{ 16,32 }));
+	checkPos_.emplace_back((pos + Vector2{ 0, 32 }));
+	checkPos_.emplace_back((pos + Vector2{ 0,16 }));
 
 }
 

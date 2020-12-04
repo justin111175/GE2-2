@@ -18,7 +18,7 @@ bool PadInput::SetUp(void)
 			{InputID::Btn1,PAD_INPUT_1},
 			{InputID::Btn2,PAD_INPUT_2},
 			{InputID::Btn3,PAD_INPUT_3},
-			{InputID::Mean,PAD_INPUT_8}
+			{InputID::ESC,PAD_INPUT_8}
 
 		};
 

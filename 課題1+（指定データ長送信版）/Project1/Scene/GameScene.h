@@ -19,6 +19,7 @@ public:
 	~GameScene();
 	void SetBomb(int ownID,int selfID,Vector2 pos,int lengh, std::chrono::system_clock::time_point time,bool sendFlag);
 	void SetFire(Vector2,int);
+	void SetFire(Vector2,double, int cnt);
 	void DeathEraser();
 
 	int GetBombSize(int ownID_);
@@ -46,7 +47,6 @@ private:
 	int Cnt_;
 	int count_;
 	BombStruct bomb_;
-
 
 };
 

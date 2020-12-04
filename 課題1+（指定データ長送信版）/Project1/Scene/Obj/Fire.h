@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Obj.h"
 #include "../BaseScene.h"
 #include "../../InterNet/NetWork.h"
@@ -10,11 +10,11 @@ using PairFire = std::pair<bool, int>;
 
 enum class FIRE_DIR
 {
-	’†ŠÔ,
-	UP,
 	RIGHT,
 	DOWN,
-	LEFT
+	LEFT,
+	UP
+
 };
 
 class Fire :
@@ -22,28 +22,27 @@ class Fire :
 {
 public:
 
-	Fire(Vector2,int, BaseScene& scene);
+	Fire(Vector2 pos, int lengh,bool flag, BaseScene& scene);
+	Fire(Vector2 pos, double rad, int cnt, BaseScene& scene);
 	~Fire();
 	void Update(void) override;
 
 	void Draw(void)override;
 	bool isPacket()override;
 	ObjID GetObjID()override;
-	void DrawInit();
+
+	void SetFireInit();
 private:
+	std::list<unique_Obj> listFire_;
+	std::map<FIRE_DIR, std::function<void(void)>> setFire_;
 	BaseScene& scene_;
-
+	bool flag_;
 	std::chrono::system_clock::time_point start_, end_;
-	std::vector<PairFire> vecPairFire_;
 
-	std::vector<int> vecfire_;
-	int fireWidth_;
-
-	int lengh_;
-	int animeCnt_;
+	int rad_;
+	std::map<FIRE_DIR,int> lengh_;
 	int count_;
-	std::vector<int> cnt_;
-	int tmpCnt_;
-	std::map<int, std::function<void(int)>> Drawfire_;
+	int cnt_;
+	std::vector<int> vecfire_;
 };
 

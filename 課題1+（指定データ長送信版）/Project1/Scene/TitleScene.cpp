@@ -81,6 +81,10 @@ void TitleScene::DrawOwn()
 	
 	SetFontSize(50);
 	DrawString(0, 0, "Title  Scene", 0x000000, 0xFFFFFF);
+	SetFontSize(30);
+
+	DrawBox(200, 400, 650, 450, 0x000000, true);
+	DrawString(200, 400, "スペースキーを押してください。", 0xFFFFFF, 0x000000);
 
 
 

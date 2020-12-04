@@ -42,30 +42,25 @@ unique_Base LoginScene::Update(unique_Base own)
 	return std::move(own);
 }
 
-LoginScene::LoginScene()
+void LoginScene::GetHostIP()
 {
-	IpImageMng.GetID("1", "image/1.jpg", { 800,600 }, { 1,1 });
-
 	std::ifstream ifp("ini/hostIP.txt");
 
 
 
 	std::string getlineString_;
 
-	auto stringInt = [](std::string string) {
 
-		return atoi(string.c_str());
-
-	};
 
 
 	if (ifp.is_open())
 	{
 		if (!ifp.eof())
 		{
-			while (std::getline(ifp, getlineString_, '.'))
+			while (std::getline(ifp, getlineString_))
 			{
-				stringIp_.emplace_back(stringInt(getlineString_));
+				VectorIP_.emplace_back(getlineString_);
+				//stringIp_.emplace_back(stringInt(getlineString_));
 				if (ifp.eof())
 				{
 					break;
@@ -74,10 +69,22 @@ LoginScene::LoginScene()
 		}
 	}
 
-		mean_.try_emplace(LoginMean_ID::HOST, "オンライン【ホスト】");
-		mean_.try_emplace(LoginMean_ID::GEST, "オンライン【ゲスト】");
-		mean_.try_emplace(LoginMean_ID::GEST_BEFORE, "オンライン【前回ゲスト】");
-		mean_.try_emplace(LoginMean_ID::NON, "オフライン");
+
+}
+
+LoginScene::LoginScene()
+{
+	IpImageMng.GetID("1", "image/1.jpg", { 800,600 }, { 1,1 });
+
+
+
+	GetHostIP();
+	hostIpCnt_ = 0;
+
+	mean_.try_emplace(LoginMean_ID::HOST, "オンライン【ホスト】");
+	mean_.try_emplace(LoginMean_ID::GEST, "オンライン【ゲスト】");
+	mean_.try_emplace(LoginMean_ID::GEST_BEFORE, "オンライン【前回ゲスト】");
+	mean_.try_emplace(LoginMean_ID::NON, "オフライン");
 
 	func_.try_emplace(UpdataMode::SetNetWork, std::bind(&LoginScene::SetNetWork, this));
 	func_.try_emplace(UpdataMode::GetHostIP, std::bind(&LoginScene::GetHostIp, this));
@@ -91,7 +98,7 @@ LoginScene::LoginScene()
 	testFlag_ = false;
 	ipData = IpNetwork.GetIp();
 
-
+	intOut_ = IN_OUT::Out;
 
 
 
@@ -113,6 +120,7 @@ void LoginScene::GetCount_Down()
 		time.iData[0] = data_[0].iData;
 		time.iData[1] = data_[1].iData;
 		IpNetwork.start = time.start_+ std::chrono::milliseconds(15000);
+		IpNetwork.countFlag_ = true;
 	}
 
 
@@ -207,7 +215,7 @@ void LoginScene::Ctl(conType input)
 
 					break;
 				case LoginMean_ID::GEST_BEFORE:
-					B_GEST();
+					intOut_ = IN_OUT::In;
 
 					break;
 				case LoginMean_ID::NON:
@@ -222,6 +230,61 @@ void LoginScene::Ctl(conType input)
 			}
 		}
 	}
+
+}
+
+void LoginScene::InCtl(conType input)
+{
+	(*controller[input])();
+	for (auto data : controller[input]->GetCntData())
+	{
+		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
+		{
+			switch (data.first)
+			{
+			case InputID::Left:
+				break;
+			case InputID::Right:
+				break;
+			case InputID::Up:
+				if (hostIpCnt_ > 0)
+				{
+					hostIpCnt_--;
+				}
+				else
+				{
+					hostIpCnt_ = VectorIP_.size()-1;
+				}
+
+				break;
+			case InputID::Down:
+				if (hostIpCnt_ >= VectorIP_.size()-1)
+				{
+					hostIpCnt_ = 0;
+				}
+				else
+				{
+					hostIpCnt_++;
+				}
+
+				break;
+
+			case InputID::Btn1:
+				intOut_ = IN_OUT::Out;
+
+				B_GEST();
+
+				break;
+			case InputID::ESC:
+				intOut_ = IN_OUT::Out;
+				hostIpCnt_ = 0;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 
 }
 
@@ -264,9 +327,26 @@ void LoginScene::GEST()
 
 	if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
 	{	
-
+		int cnt_ = 0;
 		std::ofstream ofp("ini/hostIP.txt");
-		ofp << ip;
+
+		ofp << ip<<std::endl;
+		cnt_++;
+
+		if (VectorIP_.size() > 0)
+		{
+			while (cnt_ < 5)
+			{
+				if (VectorIP_.size() > cnt_-1)
+				{
+					ofp << VectorIP_[cnt_-1]<<std::endl;
+
+				}
+				cnt_++;
+
+			}
+		}
+
 		ofp.close();
 
 		TRACE("ホスト接続\n");
@@ -284,17 +364,30 @@ void LoginScene::B_GEST()
 	IpNetwork.SetNetWorkMode(NetWorkMode::GEST);
 
 	IPDATA hostIP;
+	std::string ip, data;
 
-	hostIP.d1 = stringIp_[0];
-	hostIP.d2 = stringIp_[1];
-	hostIP.d3 = stringIp_[2];
-	hostIP.d4 = stringIp_[3];
+	ip =VectorIP_[hostIpCnt_];
+	std::stringstream ipData;
+
+
+	ipData << ip;
+	
+	auto GetIpNum = [&]() {
+		std::getline(ipData, data, '.');
+		return atoi(data.c_str());
+	};
+	hostIP.d1 = GetIpNum();
+	hostIP.d2 = GetIpNum();
+	hostIP.d3 = GetIpNum();
+	hostIP.d4 = GetIpNum();	
+
 
 	if (IpNetwork.ConnectHost(hostIP) == ActiveState::Init)
 	{
 		TRACE("ホスト接続\n");
 		mode_ = UpdataMode::StartInit;
 		TRACE("ホストからの開始合図を待ち\n");
+
 	}
 }
 
@@ -302,7 +395,18 @@ void LoginScene::SetNetWork()
 {
 	std::ifstream ifp("ini/hostIP.txt");
 
-	Ctl(conType::Key);
+	if (intOut_ == IN_OUT::Out)
+	{
+		Ctl(conType::Key);
+
+	}
+	else
+	{
+		InCtl(conType::Key);
+	}
+
+
+
 
 }
 
@@ -332,6 +436,7 @@ void LoginScene::StartInit()
 
 			for (auto handle : IpNetwork.GetHandleAll())
 			{
+				data.clear();
 				uniondata_.iData = handle.second * 5;
 				data.insert(data.end(), uniondata_);
 
@@ -339,8 +444,6 @@ void LoginScene::StartInit()
 				data.insert(data.end(), uniondata_);
 				
 				IpNetwork.SendMesAll(MesType::ID,data,handle.first);
-
-
 
 			}
 
@@ -358,7 +461,7 @@ void LoginScene::StartInit()
 		else if (IpNetwork.GetActiv() == ActiveState::Play)
 		{
 
-			IpNetwork.tmx_->LoadTmx("map/ObjTest.tmx");
+			IpNetwork.tmx_->LoadTmx("map/testMap.tmx");
 
 			TRACE("プレイモードに行く\n");
 			mode_ = UpdataMode::Play;
@@ -389,7 +492,13 @@ void LoginScene::StartInit()
 
 		if (IpNetwork.GetActiv() == ActiveState::Init)
 		{
-			//IpNetwork.NetRev();
+			if (IpNetwork.countFlag_)
+			{
+				IpNetwork.end = std::chrono::system_clock::now();
+
+				IpNetwork.time_ = std::chrono::duration_cast<std::chrono::milliseconds>(IpNetwork.start - IpNetwork.end).count() / 1000;
+
+			}
 
 		}
 		if (IpNetwork.GetActiv() == ActiveState::Stanby)
@@ -438,14 +547,7 @@ void LoginScene::Draw()
 void LoginScene::DrawOwn()
 {
 
-
-
-	//DrawGraph(0, 0, IpImageMng.GetID("1")[0], true);
-
-	SetFontSize(50);
-	DrawString(0, 0, "Login  Scene", 0xFFFFFF,0x000000 );
-	
-
+	DrawBox(0, 0, IpSceneMng.screenSize.x, IpSceneMng.screenSize.y, 0xcc81ff, true);
 
 	SetFontSize(40);
 
@@ -453,15 +555,32 @@ void LoginScene::DrawOwn()
 	SetFontSize(30);
 
 
-
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 125);
-	DrawBox(300, 320 + static_cast<int>(meanID_) * 50, 660, 360 + static_cast<int>(meanID_) * 50, 0xFFFFFF, true);
-	SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
-	for (auto i : mean_)
+	if (intOut_ == IN_OUT::Out)
 	{
-		DrawString(300, 320 + static_cast<int>(i.first) * 50, i.second, 0xffffff, true);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 125);
 
+		DrawBox(300, 320 + static_cast<int>(meanID_) * 50, 660, 360 + static_cast<int>(meanID_) * 50, 0xFFFFFF, true);
+		SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
+		for (auto i : mean_)
+		{
+			DrawString(300, 320 + static_cast<int>(i.first) * 50, i.second, 0xffffff, true);
+
+		}
 	}
+	else
+	{
+
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 125);
+		DrawBox(300, 320+ hostIpCnt_*40, 660, 350+ hostIpCnt_*40, 0xFFFFFF, true);
+		SetDrawBlendMode(DX_BLENDGRAPHTYPE_NORMAL, 0);
+		for (int i = 0; i < VectorIP_.size(); i++)
+		{
+			DrawFormatString(300, 320+i*40, 0x000000, "%d. %s",i+1,VectorIP_[i].c_str());
+
+		}
+	}
+
 
 
 

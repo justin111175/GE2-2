@@ -12,13 +12,19 @@ enum class LoginMean_ID
 	NON
 
 };
+enum class IN_OUT
+{
+	Out,
+	In,
+	MAX
+};
 
 class LoginScene :
 	public BaseScene
 {
 public:
 	unique_Base Update(unique_Base own) override;					// çXêV
-
+	void  GetHostIP();
 	LoginScene();
 	~LoginScene();
 
@@ -28,6 +34,7 @@ private:
 	Vector2 screen_size_;
 
 	void Ctl(conType input);
+	void InCtl(conType input);
 
 	UpdataMode mode_;
 
@@ -44,6 +51,10 @@ private:
 	void Play();
 	std::map<LoginMean_ID, const char*> mean_;
 	LoginMean_ID meanID_;
+
+
+	std::vector<std::string> VectorIP_;
+	int hostIpCnt_;
 	IPDATA ipData;
 	void Draw();
 	void DrawOwn() override;
@@ -51,7 +62,6 @@ private:
 	char Name[31];
 	bool testFlag_;
 	
-	std::vector<int> stringIp_;
-
+	IN_OUT intOut_;
 };
 

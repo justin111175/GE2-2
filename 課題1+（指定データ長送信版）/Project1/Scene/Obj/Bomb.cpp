@@ -47,7 +47,7 @@ void Bomb::Update(void)
 	if (isAlive)
 	{
 		end_ = std::chrono::system_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(1000).count())
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count() > std::chrono::milliseconds(500).count())
 		{
 			IpNetwork.tmx_->checkMap_[(pos_.y) / 32][(pos_.x) / 32] = 0;
 
