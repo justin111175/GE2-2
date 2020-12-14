@@ -146,11 +146,15 @@ public:
 	std::map<MesType, std::list<MesPacket>> saveData_;
 
 	void EraserPac();
-	bool countFlag_;
+	bool countFlag_;	// ゲームシーン開始するかどうか（true:開始前、false:開始）
 	
+	std::pair<int, int> GetPlayerPac();
 
 private:
 	
+	std::pair<int, int> playerPac_;//プレイヤーのID、プレイヤーの数
+
+
 	std::map<MesType, std::function<void(int, MesHeader&, MesPacket&)>> revFunc_;
 	
 	std::unique_ptr<NetWorkState> state_;

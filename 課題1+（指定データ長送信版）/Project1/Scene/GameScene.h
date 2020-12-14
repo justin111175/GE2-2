@@ -37,7 +37,7 @@ private:
 
 	std::list<int> deathID_;
 
-	std::pair<int, int> playerPac_;
+	std::pair<int, int> playerPac_;//プレイヤーのID、プレイヤーの数
 
 	std::list<unique_Obj> objList_;
 

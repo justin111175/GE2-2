@@ -593,6 +593,20 @@ void NetWork::EraserPac()
 
 }
 
+std::pair<int,int> NetWork::GetPlayerPac()
+{
+    MesPacket data_;
+    data_ = IpNetwork.GetNewPacket(MesType::ID);
+
+    if (data_.size())
+    {
+        playerPac_.first = data_[0].iData;
+        playerPac_.second = data_[1].iData;
+
+    }
+    return  playerPac_;
+}
+
 
 void NetWork::RevInit()
 {
@@ -602,10 +616,12 @@ void NetWork::RevInit()
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
-        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
 
-        //TypePacket_[0].
+        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
         TRACE("COUNT_DOWN_ROOMゲット\n");
+
+        
+
         });
 
     revFunc_.try_emplace(MesType::ID, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
@@ -625,9 +641,15 @@ void NetWork::RevInit()
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
-        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
-
-        TRACE("COUNT_DOWN_GAMEゲット\n");
+        if (!countFlag_)
+        {
+            TRACE("COUNT_DOWN_GAMEエラー（ゲームシーン行く前）\n");
+        }
+        else
+        {
+            TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+            TRACE("COUNT_DOWN_GAMEゲット\n");
+        }
         });
 
 
@@ -723,9 +745,55 @@ void NetWork::RevInit()
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
-        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+        TRACE("Bonb オーナーID: %d\n", revPacket_[0]);
+        TRACE("Bonb 自分ID: %d\n", revPacket_[1]);
 
-        TRACE("SET_BOMBゲット\n");
+
+        if (countFlag_)
+        {
+            TRACE("ボム設定エラー（開始前設置）\n");
+        }
+        else
+        {
+            if (revPacket_[0].iData > (GetHandleAll().size() + 1) * 5)
+            {
+                TRACE("ボム設定エラー（オーナーID異常）\n");
+
+
+            }
+            else
+            {
+                auto tmp = revPacket_[1].iData - revPacket_[0].iData;
+
+                if (tmp >= 5 || tmp < 0)
+                {
+                    if (tmp >= 5)
+                    {
+                        TRACE("ボム設定エラー（自分のID異常-ID大きすぎ）\n");
+
+                    }
+                    if (tmp < 0)
+                    {
+                        TRACE("ボム設定エラー（自分のID異常-ID小さすぎ）\n");
+
+                    }
+
+                }
+                else
+                {
+                    TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+                    TRACE("SET_BOMBゲット\n\n");
+
+                }
+
+            }
+
+        }
+
+
+        
+
+
         });
 
     revFunc_.try_emplace(MesType::DEATH, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {

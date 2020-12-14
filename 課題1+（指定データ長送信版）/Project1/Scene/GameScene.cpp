@@ -32,15 +32,7 @@ void GameScene::DrawOwn()
 
 void GameScene::GetPlayerPac()
 {
-	MesPacket data_;
-	data_ = IpNetwork.GetNewPacket(MesType::ID);
 
-	if (data_.size())
-	{
-		playerPac_.first = data_[0].iData;
-		playerPac_.second = data_[1].iData;
-
-	}
 }
 
 void GameScene::GetStartTime()
@@ -324,7 +316,8 @@ GameScene::GameScene()
 	}
 	if (IpNetwork.GetNetWorkMode() == NetWorkMode::GEST)
 	{
-		GetPlayerPac();
+		playerPac_=IpNetwork.GetPlayerPac();
+
 
 	}
 	else

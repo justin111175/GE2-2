@@ -173,7 +173,6 @@ void TmxObj::SendTmxData()//host
 
 	UnionData unionD;
 
-	Header header;
 	
 	std::string stringData;
 
