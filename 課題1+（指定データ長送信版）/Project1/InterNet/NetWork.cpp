@@ -616,9 +616,17 @@ void NetWork::RevInit()
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
 
+        if (!GetFlag_[MesType::COUNT_DOWN_ROOM])
+        {
+            TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+            GetFlag_[MesType::COUNT_DOWN_ROOM] = true;
+            TRACE("COUNT_DOWN_ROOMゲット\n\n");
+        }
+        else
+        {
+            TRACE("COUNT_DOWN_ROOMエラー（2回目のCOUNT_DOWN_ROOM情報）\n\n");
+        }
 
-        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
-        TRACE("COUNT_DOWN_ROOMゲット\n");
 
         
 
@@ -629,10 +637,38 @@ void NetWork::RevInit()
         // ヘッダーの部分確保する
         revPacket_.resize(revMesHeader_.length);
         NetWorkRecv(handle, revPacket_.data(), revMesHeader_.length * 4);
+        //0:ID ,1:全てのプレイヤー数
+        
+        if ((revPacket_[1].iData - 1) * 5 < revPacket_[0].iData)
+        {
+            TRACE("IDエラー（IDが%dを超えた）\n\n", (revPacket_[1].iData-1)*5);
+        }
+        else
+        {
+            if (revPacket_[0].iData%5!=0)
+            {
+                TRACE("IDエラー（IDは5の倍数ではありません）\n\n");
+            }
+            else
+            {
 
-        TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+                if (!GetFlag_[MesType::ID])
+                {
+                    TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
 
-        TRACE("ID : %d , 数 : %d\n", revPacket_[0].iData, revPacket_[1].iData);
+                    TRACE("IDゲット    ID : %d , 数 : %d\n", revPacket_[0].iData, revPacket_[1].iData);
+                    GetFlag_[MesType::ID] = true;
+                }
+                else
+                {
+                    TRACE("IDエラー（2回目のID情報）\n\n");
+
+                }
+
+            }
+
+        }
+
         });
 
     revFunc_.try_emplace(MesType::COUNT_DOWN_GAME, [&](int handle, MesHeader& revMesHeader_, MesPacket& revPacket_) {
@@ -643,12 +679,24 @@ void NetWork::RevInit()
 
         if (!countFlag_)
         {
-            TRACE("COUNT_DOWN_GAMEエラー（ゲームシーン行く前）\n");
+            TRACE("COUNT_DOWN_GAMEエラー（ゲームシーン行く前）\n\n");
         }
         else
         {
-            TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
-            TRACE("COUNT_DOWN_GAMEゲット\n");
+
+            if (!GetFlag_[MesType::COUNT_DOWN_GAME])
+            {
+                TypePacket_.emplace_back(revMesHeader_.type, revPacket_);
+                TRACE("COUNT_DOWN_GAMEゲット\n\n");
+                GetFlag_[MesType::COUNT_DOWN_GAME] = true;
+            }
+            else
+            {
+                TRACE("COUNT_DOWN_GAMEエラー（2回目のCOUNT_DOWN_GAME情報）\n\n");
+
+            }
+
+
         }
         });
 
@@ -921,6 +969,12 @@ NetWork::NetWork()
 
     countFlag_ = false;
 
+    GetFlag_.try_emplace(MesType::COUNT_DOWN_ROOM, false);
+    GetFlag_.try_emplace(MesType::COUNT_DOWN_GAME, false);
+    GetFlag_.try_emplace(MesType::ID, false);
+    
+    
+    
     tmx_ = std::make_unique<TmxObj>();
 
 

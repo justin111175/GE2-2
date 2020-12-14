@@ -152,6 +152,7 @@ public:
 
 private:
 	
+	std::map<MesType, bool> GetFlag_; //とったことがあるかどうかチェック（true：とった、false：とってない）
 	std::pair<int, int> playerPac_;//プレイヤーのID、プレイヤーの数
 
 
